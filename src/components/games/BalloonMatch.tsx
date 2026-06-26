@@ -110,15 +110,8 @@ export default function BalloonMatch({ cards, onWin }: BalloonMatchProps) {
                   key={b.id}
                   layout
                   initial={{ scale: 0 }}
-                  animate={{ scale: 1, y: [0, -10, 0] }}
+                  animate={{ scale: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
-                  transition={{
-                    y: {
-                      repeat: Infinity,
-                      duration: 2 + Math.random(),
-                      ease: "easeInOut",
-                    },
-                  }}
                   onClick={() => handleSelect(b)}
                   className={`relative cursor-pointer flex flex-col items-center justify-center w-28 h-28 rounded-full shadow-lg border-4 transition-all ${
                     selectedId === b.id

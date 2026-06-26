@@ -461,10 +461,21 @@ function MomPractice({
         body: JSON.stringify({ type, level }),
       });
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to fetch");
+        let errorMessage = "Lỗi kết nối máy chủ";
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          errorMessage = `Lỗi máy chủ (${res.status})`;
+        }
+        throw new Error(errorMessage);
       }
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("Dữ liệu trả về không hợp lệ");
+      }
       if (type === "vocabulary") setVocab(data.words || []);
       if (type === "speaking") setSpeaking(data);
       if (type === "writing") setWriting(data);
@@ -547,8 +558,23 @@ function MomPractice({
         body: JSON.stringify({ type, topic, content }),
       });
 
-      if (!res.ok) throw new Error("Chấm điểm thất bại");
-      const data = await res.json();
+      if (!res.ok) {
+        let errorMessage = "Chấm điểm thất bại";
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          errorMessage = `Lỗi máy chủ (${res.status})`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("Dữ liệu trả về không hợp lệ");
+      }
 
       if (type === "speaking") setEvalSpeaking(data);
       else setEvalWriting(data);
@@ -996,6 +1022,7 @@ function TapToTranslateText({ text }: { text: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: cleanWord }),
       });
+      if (!res.ok) throw new Error("Translation failed");
       const data = await res.json();
       setTranslation({ word: cleanWord, vi: data.translation });
 
@@ -1267,6 +1294,7 @@ function MomGame({ level }: { level: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "match", level }),
       });
+      if (!res.ok) throw new Error("Load game failed");
       const data = await res.json();
       setPairs(data.pairs || []);
     } catch (e) {

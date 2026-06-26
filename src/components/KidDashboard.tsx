@@ -174,11 +174,28 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           }),
         });
         if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || "Failed to fetch");
+          let errorMessage = "Lỗi kết nối đến máy chủ";
+          try {
+            const errorData = await res.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch (e) {
+            errorMessage = `Lỗi máy chủ (${res.status}). Vui lòng thử lại sau.`;
+          }
+          throw new Error(errorMessage);
         }
-        data = await res.json();
-        localStorage.setItem(cacheKey, JSON.stringify(data));
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Dữ liệu trả về không hợp lệ. Vui lòng thử lại.");
+        }
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(data));
+        } catch (storageError) {
+          console.warn(
+            "Could not save to localStorage. Cache might be full.",
+            storageError,
+          );
+        }
       }
 
       if (type === "kids_vocabulary") {
