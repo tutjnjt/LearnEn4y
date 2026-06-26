@@ -1,0 +1,6 @@
+{
+  "name": "Family Lingo",
+  "description": "Ứng dụng học tiếng Anh dành cho mẹ ôn thi IELTS và bé học tiếng Anh cơ bản.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

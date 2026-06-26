@@ -1,0 +1,1612 @@
+import React, { useState } from "react";
+import {
+  Gamepad2,
+  Loader2,
+  Star,
+  Link2,
+  Headphones,
+  Mic,
+  BookOpen,
+  PenTool,
+  ChevronDown,
+  Map,
+  ArrowLeft,
+  Plus,
+  Volume2,
+  Puzzle,
+} from "lucide-react";
+import { KidFlashcard } from "../types";
+import { KidMemoryMatrix } from "./KidMemoryMatrix";
+import { KidWordMatch } from "./KidWordMatch";
+import { KidSkillGame } from "./KidSkillGame";
+import { KidJourneyMap } from "./KidJourneyMap";
+import BalloonMatch from "./games/BalloonMatch";
+import SoundMemory from "./games/SoundMemory";
+import MagicColoring from "./games/MagicColoring";
+
+export function KidDashboard({ onBack }: { onBack: () => void }) {
+  const [loading, setLoading] = useState<string | null>(null);
+  const [view, setView] = useState<"books" | "volumes" | "map" | "menu">(
+    "books",
+  );
+  const [level, setLevel] = useState("Level 1");
+  const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [selectedVolume, setSelectedVolume] = useState<number | null>(null);
+  const [customBooks, setCustomBooks] = useState<
+    { id: string; name: string; color: string }[]
+  >([]);
+  const [showAddBook, setShowAddBook] = useState(false);
+  const [newBookName, setNewBookName] = useState("");
+
+  const defaultBooks = [
+    {
+      id: "family_friends",
+      name: "Family and Friends",
+      color: "bg-blue-100 text-blue-600 border-blue-300 hover:bg-blue-50",
+    },
+    {
+      id: "global_success",
+      name: "Global Success",
+      color:
+        "bg-emerald-100 text-emerald-600 border-emerald-300 hover:bg-emerald-50",
+    },
+    {
+      id: "starters",
+      name: "Starters",
+      color: "bg-amber-100 text-amber-600 border-amber-300 hover:bg-amber-50",
+    },
+  ];
+
+  const allBooks = [...defaultBooks, ...customBooks];
+
+  const handleAddBook = () => {
+    if (newBookName.trim()) {
+      const colors = [
+        "bg-purple-100 text-purple-600 border-purple-300 hover:bg-purple-50",
+        "bg-rose-100 text-rose-600 border-rose-300 hover:bg-rose-50",
+        "bg-cyan-100 text-cyan-600 border-cyan-300 hover:bg-cyan-50",
+      ];
+      const randomColor = colors[customBooks.length % colors.length];
+
+      setCustomBooks([
+        ...customBooks,
+        {
+          id: `custom_${Date.now()}`,
+          name: newBookName.trim(),
+          color: randomColor,
+        },
+      ]);
+      setNewBookName("");
+      setShowAddBook(false);
+    }
+  };
+
+  const [levelStars, setLevelStars] = useState<Record<string, number>>({
+    "Level 1": 0,
+    "Level 2": 0,
+    "Level 3": 0,
+  });
+  const [gameStars, setGameStars] = useState<
+    Record<string, Record<string, number>>
+  >({});
+  const [avatar, setAvatar] = useState("🦊");
+  const [showAvatarSelect, setShowAvatarSelect] = useState(false);
+  const avatars = ["👧", "👦", "🦊", "🐶", "🐱", "🐼", "🐯", "🐰", "🐻", "🐸"];
+  const [flashcards, setFlashcards] = useState<KidFlashcard[]>([]);
+  const [skillData, setSkillData] = useState<any>(null);
+  const [gameMode, setGameMode] = useState<string | null>(null); // 'matrix', 'match', 'kids_listening', etc.
+  const [error, setError] = useState<string | null>(null);
+  const [stars, setStars] = useState(0);
+  const [points, setPoints] = useState(0);
+
+  const ALL_GAMES =
+    selectedBook === "starters" && selectedVolume === 2
+      ? ["match", "kids_listening", "kids_speaking", "kids_reading"]
+      : [
+          "matrix",
+          "match",
+          "kids_listening",
+          "kids_speaking",
+          "kids_phonics",
+          "kids_reading",
+          "kids_writing",
+        ];
+  const isLevelComplete = ALL_GAMES.every(
+    (g) => (gameStars[level]?.[g] || 0) > 0,
+  );
+
+  const handleNextLevel = () => {
+    setLevelStars((prev) => ({
+      ...prev,
+      [level]: 3,
+    }));
+    const currentIndex = levels.findIndex((l) => l.id === level);
+    if (currentIndex < levels.length - 1) {
+      setLevel(levels[currentIndex + 1].id);
+    }
+    setView("map");
+  };
+
+  const renderStars = (gameId: string) => {
+    const s = gameStars[level]?.[gameId] || 0;
+    if (s === 0) return null;
+    return (
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-white px-3 py-1 rounded-full border-2 border-yellow-300 shadow-sm z-10">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Star
+            key={i}
+            className={`w-4 h-4 ${i <= s ? "fill-yellow-400 text-yellow-400" : "text-slate-200 fill-slate-100"}`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const fetchGame = async (type: string, mode: string) => {
+    setLoading(mode);
+    setError(null);
+    setFlashcards([]);
+    setSkillData(null);
+    setGameMode(null);
+    try {
+      const bookName =
+        allBooks.find((b) => b.id === selectedBook)?.name || selectedBook;
+      const currentLevelObj = levels.find((l) => l.id === level);
+      const topic =
+        (currentLevelObj as any)?.topic || currentLevelObj?.name || "";
+
+      const cacheKey = `kids_game_v5_${selectedBook}_${selectedVolume}_${level}_${type}_${mode}`;
+      const cachedData = localStorage.getItem(cacheKey);
+
+      let data;
+      if (cachedData) {
+        data = JSON.parse(cachedData);
+      } else {
+        const res = await fetch("/api/kids/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type,
+            level,
+            book: bookName,
+            volume: selectedVolume,
+            topic,
+          }),
+        });
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to fetch");
+        }
+        data = await res.json();
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+      }
+
+      if (type === "kids_vocabulary") {
+        setFlashcards(data.flashcards || []);
+      } else {
+        setSkillData(data);
+      }
+      setGameMode(mode);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleWin = (earnedStars: number = 5, earnedPoints: number = 50) => {
+    setStars((prev) => prev + earnedStars);
+    setPoints((prev) => prev + earnedPoints);
+    if (gameMode) {
+      setGameStars((prev) => {
+        const currentLevelStars = prev[level] || {};
+        const newStars = Math.max(
+          currentLevelStars[gameMode] || 0,
+          earnedStars,
+        );
+        return {
+          ...prev,
+          [level]: { ...currentLevelStars, [gameMode]: newStars },
+        };
+      });
+    }
+    setGameMode(null);
+    setFlashcards([]);
+    setSkillData(null);
+  };
+
+  const FAF1_UNITS = [
+    {
+      id: "Unit 1",
+      name: "Unit 1",
+      topic: "What's this? (Đồ dùng học tập)",
+      emoji: "🎒",
+    },
+    { id: "Unit 2", name: "Unit 2", topic: "Playtime! (Đồ chơi)", emoji: "🧸" },
+    {
+      id: "Unit 3",
+      name: "Unit 3",
+      topic: "This is my nose! (Bộ phận cơ thể)",
+      emoji: "👃",
+    },
+    {
+      id: "Unit 4",
+      name: "Unit 4",
+      topic: "He's a hero! (Nghề nghiệp)",
+      emoji: "🦸‍♂️",
+    },
+    {
+      id: "Unit 5",
+      name: "Unit 5",
+      topic: "Where's the ball? (Vị trí, Công viên)",
+      emoji: "⚽",
+    },
+    {
+      id: "Unit 6",
+      name: "Unit 6",
+      topic: "Billy's teddy! (Gia đình)",
+      emoji: "👨‍👩‍👧‍👦",
+    },
+    {
+      id: "Unit 7",
+      name: "Unit 7",
+      topic: "Are these his trousers? (Quần áo)",
+      emoji: "👕",
+    },
+    {
+      id: "Unit 8",
+      name: "Unit 8",
+      topic: "Where's Grandma? (Phòng trong nhà)",
+      emoji: "🏠",
+    },
+    {
+      id: "Unit 9",
+      name: "Unit 9",
+      topic: "Lunchtime! (Đồ ăn trưa)",
+      emoji: "🍱",
+    },
+    {
+      id: "Unit 10",
+      name: "Unit 10",
+      topic: "A new friend! (Miêu tả ngoại hình)",
+      emoji: "👱‍♀️",
+    },
+    {
+      id: "Unit 11",
+      name: "Unit 11",
+      topic: "I like monkeys! (Động vật)",
+      emoji: "🐒",
+    },
+    {
+      id: "Unit 12",
+      name: "Unit 12",
+      topic: "Dinnertime! (Bữa tối)",
+      emoji: "🍽️",
+    },
+    {
+      id: "Unit 13",
+      name: "Unit 13",
+      topic: "Tidy up! (Phòng ngủ)",
+      emoji: "🛏️",
+    },
+    {
+      id: "Unit 14",
+      name: "Unit 14",
+      topic: "Action boy can run! (Khả năng)",
+      emoji: "🏃‍♂️",
+    },
+    {
+      id: "Unit 15",
+      name: "Unit 15",
+      topic: "Let's play ball! (Hoạt động bãi biển)",
+      emoji: "🏖️",
+    },
+  ];
+
+  const FAF2_UNITS = [
+    {
+      id: "Unit 1",
+      name: "Unit 1",
+      topic: "Our new things (Đồ dùng học tập)",
+      emoji: "📚",
+    },
+    {
+      id: "Unit 2",
+      name: "Unit 2",
+      topic: "They're happy now! (Cảm xúc & Cơ thể)",
+      emoji: "😊",
+    },
+    {
+      id: "Unit 3",
+      name: "Unit 3",
+      topic: "I can ride a bike! (Khả năng & Đồ chơi)",
+      emoji: "🚲",
+    },
+    {
+      id: "Unit 4",
+      name: "Unit 4",
+      topic: "Have you got a milkshake? (Đồ ăn thức uống)",
+      emoji: "🥤",
+    },
+    {
+      id: "Unit 5",
+      name: "Unit 5",
+      topic: "We've got English (Môn học)",
+      emoji: "🏫",
+    },
+    {
+      id: "Unit 6",
+      name: "Unit 6",
+      topic: "Let's play after school! (Hoạt động hàng ngày)",
+      emoji: "⚽",
+    },
+    {
+      id: "Unit 7",
+      name: "Unit 7",
+      topic: "It isn't cold today! (Thời tiết & Quần áo)",
+      emoji: "☀️",
+    },
+    {
+      id: "Unit 8",
+      name: "Unit 8",
+      topic: "Let's buy presents! (Quà tặng & Tiệc sinh nhật)",
+      emoji: "🎁",
+    },
+    {
+      id: "Unit 9",
+      name: "Unit 9",
+      topic: "What's the time? (Thời gian & Sinh hoạt)",
+      emoji: "⏰",
+    },
+    {
+      id: "Unit 10",
+      name: "Unit 10",
+      topic: "May I take a photo? (Vui chơi giải trí)",
+      emoji: "📸",
+    },
+    {
+      id: "Unit 11",
+      name: "Unit 11",
+      topic: "In the playground (Sân chơi & Quy định)",
+      emoji: "🛝",
+    },
+    {
+      id: "Unit 12",
+      name: "Unit 12",
+      topic: "A clever baby! (Miêu tả con người, Quá khứ)",
+      emoji: "👶",
+    },
+    {
+      id: "Unit 13",
+      name: "Unit 13",
+      topic: "Look at all the animals! (Động vật trang trại)",
+      emoji: "🐄",
+    },
+    {
+      id: "Unit 14",
+      name: "Unit 14",
+      topic: "Look at the photos! (Gia đình trong quá khứ)",
+      emoji: "📸",
+    },
+    {
+      id: "Unit 15",
+      name: "Unit 15",
+      topic: "Well done! (Tổng kết)",
+      emoji: "🏆",
+    },
+  ];
+
+  const FAF3_UNITS = [
+    {
+      id: "Unit 1",
+      name: "Unit 1",
+      topic: "They're from Australia! (Quốc gia)",
+      emoji: "🌍",
+    },
+    {
+      id: "Unit 2",
+      name: "Unit 2",
+      topic: "My weekend (Hoạt động cuối tuần)",
+      emoji: "📅",
+    },
+    {
+      id: "Unit 3",
+      name: "Unit 3",
+      topic: "My things (Sở hữu đồ vật)",
+      emoji: "🎮",
+    },
+    {
+      id: "Unit 4",
+      name: "Unit 4",
+      topic: "We're having fun at the beach! (Bãi biển)",
+      emoji: "🏖️",
+    },
+    {
+      id: "Unit 5",
+      name: "Unit 5",
+      topic: "A naughty monkey! (Động vật sở thú)",
+      emoji: "🐒",
+    },
+    {
+      id: "Unit 6",
+      name: "Unit 6",
+      topic: "Jim's day (Hoạt động hàng ngày)",
+      emoji: "🌅",
+    },
+    {
+      id: "Unit 7",
+      name: "Unit 7",
+      topic: "Places to go! (Địa điểm trong thị trấn)",
+      emoji: "🏙️",
+    },
+    {
+      id: "Unit 8",
+      name: "Unit 8",
+      topic: "I'd like a melon! (Thức ăn & Đồ uống)",
+      emoji: "🍉",
+    },
+    {
+      id: "Unit 9",
+      name: "Unit 9",
+      topic: "What's the fastest animal? (So sánh động vật)",
+      emoji: "🐆",
+    },
+    {
+      id: "Unit 10",
+      name: "Unit 10",
+      topic: "In the park (Quy định trong công viên)",
+      emoji: "🏞️",
+    },
+    {
+      id: "Unit 11",
+      name: "Unit 11",
+      topic: "In the museum (Phương tiện giao thông quá khứ)",
+      emoji: "🏛️",
+    },
+    {
+      id: "Unit 12",
+      name: "Unit 12",
+      topic: "A clever baby! (Mô tả người trong quá khứ)",
+      emoji: "👶",
+    },
+    {
+      id: "Unit 13",
+      name: "Unit 13",
+      topic: "The Ancient Egyptians (Lịch sử)",
+      emoji: "🏺",
+    },
+    {
+      id: "Unit 14",
+      name: "Unit 14",
+      topic: "Did you have a good day? (Sự việc đã qua)",
+      emoji: "✅",
+    },
+    {
+      id: "Unit 15",
+      name: "Unit 15",
+      topic: "Our holiday (Dự định kỳ nghỉ tương lai)",
+      emoji: "✈️",
+    },
+  ];
+
+  const FAF4_UNITS = [
+    {
+      id: "Unit 1",
+      name: "Unit 1",
+      topic: "The food here is great! (Nhà hàng & Thức ăn)",
+      emoji: "🍲",
+    },
+    {
+      id: "Unit 2",
+      name: "Unit 2",
+      topic: "We had a concert (Buổi biểu diễn)",
+      emoji: "🎸",
+    },
+    {
+      id: "Unit 3",
+      name: "Unit 3",
+      topic: "The dinosaur museum (Bảo tàng khủng long)",
+      emoji: "🦖",
+    },
+    {
+      id: "Unit 4",
+      name: "Unit 4",
+      topic: "Whose jacket is this? (Sở hữu)",
+      emoji: "🧥",
+    },
+    {
+      id: "Unit 5",
+      name: "Unit 5",
+      topic: "Go back to the roundabout (Chỉ đường)",
+      emoji: "🗺️",
+    },
+    {
+      id: "Unit 6",
+      name: "Unit 6",
+      topic: "The best bed! (So sánh đồ vật)",
+      emoji: "🛏️",
+    },
+    {
+      id: "Unit 7",
+      name: "Unit 7",
+      topic: "Will it really happen? (Tương lai & Không gian)",
+      emoji: "🚀",
+    },
+    {
+      id: "Unit 8",
+      name: "Unit 8",
+      topic: "How much time have we got? (Sân bay & Hành lý)",
+      emoji: "✈️",
+    },
+    {
+      id: "Unit 9",
+      name: "Unit 9",
+      topic: "Something new to watch! (Truyền hình & Sở thích)",
+      emoji: "📺",
+    },
+    {
+      id: "Unit 10",
+      name: "Unit 10",
+      topic: "I've printed my document (Máy tính)",
+      emoji: "💻",
+    },
+    {
+      id: "Unit 11",
+      name: "Unit 11",
+      topic: "Have you ever been... (Trải nghiệm)",
+      emoji: "🏔️",
+    },
+    {
+      id: "Unit 12",
+      name: "Unit 12",
+      topic: "What's the matter? (Sức khỏe)",
+      emoji: "🤒",
+    },
+    {
+      id: "Unit 13",
+      name: "Unit 13",
+      topic: "Can you help me? (Giúp đỡ)",
+      emoji: "🤝",
+    },
+    {
+      id: "Unit 14",
+      name: "Unit 14",
+      topic: "We were fishing (Hành động quá khứ)",
+      emoji: "🎣",
+    },
+    {
+      id: "Unit 15",
+      name: "Unit 15",
+      topic: "Good news, bad news (Thiên nhiên & Tin tức)",
+      emoji: "📰",
+    },
+  ];
+
+  const FAF5_UNITS = [
+    {
+      id: "Unit 1",
+      name: "Unit 1",
+      topic: "Jim's day! (Các hoạt động thường ngày)",
+      emoji: "🌅",
+    },
+    {
+      id: "Unit 2",
+      name: "Unit 2",
+      topic: "Places to go! (Các địa điểm vui chơi)",
+      emoji: "🎡",
+    },
+    {
+      id: "Unit 3",
+      name: "Unit 3",
+      topic: "Could you give me a melon, please? (Thực phẩm)",
+      emoji: "🍈",
+    },
+    {
+      id: "Unit 4",
+      name: "Unit 4",
+      topic: "Getting around (Phương tiện giao thông)",
+      emoji: "🚌",
+    },
+    {
+      id: "Unit 5",
+      name: "Unit 5",
+      topic: "They had a long trip (Kỳ nghỉ)",
+      emoji: "🧳",
+    },
+    {
+      id: "Unit 6",
+      name: "Unit 6",
+      topic: "The Ancient Mayans (Lịch sử)",
+      emoji: "🗿",
+    },
+    {
+      id: "Unit 7",
+      name: "Unit 7",
+      topic: "The dinosaur museum (Khủng long)",
+      emoji: "🦕",
+    },
+    {
+      id: "Unit 8",
+      name: "Unit 8",
+      topic: "Mountains high, oceans deep (Địa lý thế giới)",
+      emoji: "⛰️",
+    },
+    {
+      id: "Unit 9",
+      name: "Unit 9",
+      topic: "In the park (Các hoạt động ngoài trời)",
+      emoji: "🌳",
+    },
+    {
+      id: "Unit 10",
+      name: "Unit 10",
+      topic: "What's the matter? (Triệu chứng bệnh tật)",
+      emoji: "🤧",
+    },
+    {
+      id: "Unit 11",
+      name: "Unit 11",
+      topic: "Will it really happen? (Dự đoán về tương lai)",
+      emoji: "🔮",
+    },
+    {
+      id: "Unit 12",
+      name: "Unit 12",
+      topic: "Something new to watch! (Chương trình truyền hình)",
+      emoji: "🎬",
+    },
+  ];
+
+  const GS1_UNITS = [
+    { id: "Unit 1", name: "Unit 1", topic: "My friends (Bạn bè)", emoji: "👋" },
+    {
+      id: "Unit 2",
+      name: "Unit 2",
+      topic: "Time and daily routines (Thời gian và các hoạt động hàng ngày)",
+      emoji: "⏰",
+    },
+    {
+      id: "Unit 3",
+      name: "Unit 3",
+      topic: "My week (Lịch học trong tuần)",
+      emoji: "📅",
+    },
+    {
+      id: "Unit 4",
+      name: "Unit 4",
+      topic: "My birthday party (Tiệc sinh nhật)",
+      emoji: "🎂",
+    },
+    {
+      id: "Unit 5",
+      name: "Unit 5",
+      topic: "Things we can do (Những việc chúng ta có thể làm)",
+      emoji: "🏃",
+    },
+    {
+      id: "Unit 6",
+      name: "Unit 6",
+      topic: "Our school facilities (Cơ sở vật chất trường học)",
+      emoji: "🏫",
+    },
+    {
+      id: "Unit 7",
+      name: "Unit 7",
+      topic: "Our timetables (Thời khóa biểu của chúng tôi)",
+      emoji: "📋",
+    },
+    {
+      id: "Unit 8",
+      name: "Unit 8",
+      topic: "My favourite subjects (Môn học yêu thích)",
+      emoji: "📚",
+    },
+    {
+      id: "Unit 9",
+      name: "Unit 9",
+      topic: "Our sports day (Ngày hội thể thao của trường)",
+      emoji: "🏅",
+    },
+    {
+      id: "Unit 10",
+      name: "Unit 10",
+      topic: "Our summer holidays (Kỳ nghỉ hè)",
+      emoji: "🏖️",
+    },
+  ];
+
+  const GS2_UNITS = [
+    {
+      id: "Unit 11",
+      name: "Unit 11",
+      topic: "My home (Ngôi nhà của tôi)",
+      emoji: "🏠",
+    },
+    {
+      id: "Unit 12",
+      name: "Unit 12",
+      topic: "Jobs (Nghề nghiệp)",
+      emoji: "👷",
+    },
+    {
+      id: "Unit 13",
+      name: "Unit 13",
+      topic: "Appearance (Ngoại hình)",
+      emoji: "👱‍♀️",
+    },
+    {
+      id: "Unit 14",
+      name: "Unit 14",
+      topic: "Daily activities (Các hoạt động thường ngày)",
+      emoji: "🌅",
+    },
+    {
+      id: "Unit 15",
+      name: "Unit 15",
+      topic: "Let's go to the zoo! (Đi sở thú)",
+      emoji: "🦁",
+    },
+    {
+      id: "Unit 16",
+      name: "Unit 16",
+      topic: "Our clothes (Quần áo của chúng ta)",
+      emoji: "👕",
+    },
+    {
+      id: "Unit 17",
+      name: "Unit 17",
+      topic: "Our pets (Thú cưng)",
+      emoji: "🐶",
+    },
+    {
+      id: "Unit 18",
+      name: "Unit 18",
+      topic: "At the food and drink stall (Tại quầy đồ ăn thức uống)",
+      emoji: "🍔",
+    },
+    {
+      id: "Unit 19",
+      name: "Unit 19",
+      topic: "What animal is it? (Đó là con gì?)",
+      emoji: "🐘",
+    },
+    {
+      id: "Unit 20",
+      name: "Unit 20",
+      topic: "The explorer (Nhà thám hiểm)",
+      emoji: "🧭",
+    },
+  ];
+
+  const STARTERS1_UNITS = Array.from({ length: 15 }, (_, i) => {
+    const topics = [
+      "Hello & Family (Chào hỏi & Gia đình)",
+      "My Body & Appearance (Cơ thể & Ngoại hình)",
+      "Colours & Numbers (Màu sắc & Số đếm)",
+      "My House & Rooms (Nhà & Các phòng)",
+      "Pets & Animals (Thú cưng & Động vật)",
+      "Food & Drink (Thức ăn & Đồ uống)",
+      "My Clothes (Quần áo của tôi)",
+      "School & Classroom (Trường & Lớp học)",
+      "My Hobbies (Sở thích của tôi)",
+      "Toys & Games (Đồ chơi & Trò chơi)",
+      "At the park (Ở công viên)",
+      "My town (Thị trấn của tôi)",
+      "Weather & Seasons (Thời tiết & Mùa)",
+      "Sports (Thể thao)",
+      "Transport (Phương tiện giao thông)",
+    ];
+    return {
+      id: `Unit ${i + 1}`,
+      name: `Unit ${i + 1}`,
+      topic: topics[i],
+      emoji: [
+        "👋",
+        "👁️",
+        "🎨",
+        "🏠",
+        "🐶",
+        "🍔",
+        "👕",
+        "🏫",
+        "🎨",
+        "🧸",
+        "🌳",
+        "🏙️",
+        "☀️",
+        "⚽",
+        "🚗",
+      ][i],
+    };
+  });
+
+  const STARTERS2_UNITS = Array.from({ length: 45 }, (_, i) => {
+    const specificTopics: Record<number, { t: string; e: string }> = {
+      1: { t: "Say Hello", e: "👋" },
+      2: { t: "Numbers, numbers", e: "🔢" },
+      3: { t: "What's your name?", e: "❓" },
+      4: { t: "Red, blue and yellow animals", e: "🎨" },
+      6: { t: "Animals and aliens", e: "👽" },
+      7: { t: "Look, listen, smile and draw", e: "✏️" },
+      9: { t: "Funny monster", e: "👾" },
+      10: { t: "Our family", e: "👨‍👩‍👧‍👦" },
+      16: { t: "What's your favourite fruit?", e: "🍎" },
+      17: { t: "What's on the menu?", e: "📝" },
+      18: { t: "A colourful house", e: "🏠" },
+      19: { t: "What's in your bedroom", e: "🛏️" },
+      25: { t: "School and the classroom", e: "🏫" },
+    };
+    const item = specificTopics[i + 1] || { t: `Fun topic ${i + 1}`, e: "✨" };
+    return {
+      id: `Unit ${i + 1}`,
+      name: `Unit ${i + 1}`,
+      topic: item.t,
+      emoji: item.e,
+    };
+  });
+
+  const defaultLevels = [
+    { id: "Level 1", name: "Mầm non (4-6T)", emoji: "🐣" },
+    { id: "Level 2", name: "Lớp 1-2 (6-8T)", emoji: "🚀" },
+    { id: "Level 3", name: "Lớp 3-5 (8-10T)", emoji: "⭐" },
+  ];
+
+  let levels = defaultLevels;
+  if (selectedBook && selectedVolume) {
+    if (selectedBook === "family_friends") {
+      if (selectedVolume === 1) levels = FAF1_UNITS;
+      else if (selectedVolume === 2) levels = FAF2_UNITS;
+      else if (selectedVolume === 3) levels = FAF3_UNITS;
+      else if (selectedVolume === 4) levels = FAF4_UNITS;
+      else if (selectedVolume === 5) levels = FAF5_UNITS;
+    } else if (selectedBook === "global_success") {
+      if (selectedVolume === 1) levels = GS1_UNITS;
+      else if (selectedVolume === 2) levels = GS2_UNITS;
+    } else if (selectedBook === "starters") {
+      if (selectedVolume === 1) levels = STARTERS1_UNITS;
+      else if (selectedVolume === 2) levels = STARTERS2_UNITS;
+    } else {
+      levels = Array.from({ length: 15 }, (_, i) => ({
+        id: `Stage ${i + 1}`,
+        name: `Chặng ${i + 1}`,
+        topic: `Bài học số ${i + 1}`,
+        emoji: [
+          "🐣",
+          "🚀",
+          "⭐",
+          "🎈",
+          "🦊",
+          "🐯",
+          "🐼",
+          "🦁",
+          "🐰",
+          "🐶",
+          "🐱",
+          "🐻",
+          "🦄",
+          "🌈",
+          "🏆",
+        ][i % 15],
+      }));
+    }
+  }
+
+  // Calculate unlocked level index (unlock next level if current has at least 1 star)
+  const currentLevelIndex = levels.findIndex(
+    (l) => (levelStars[l.id] || 0) === 0,
+  );
+  const activeLevelIndex =
+    currentLevelIndex === -1 ? levels.length - 1 : currentLevelIndex;
+
+  return (
+    <div className="max-w-5xl mx-auto w-full p-4 sm:p-6 animate-in fade-in zoom-in duration-500 overflow-x-hidden">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-white p-4 rounded-3xl shadow-sm border-4 border-yellow-200 relative z-20">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <button
+              onClick={() => setShowAvatarSelect(!showAvatarSelect)}
+              className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center text-3xl hover:bg-yellow-200 hover:scale-105 transition-all border-2 border-yellow-300"
+            >
+              {avatar}
+            </button>
+            {showAvatarSelect && (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white border-4 border-yellow-200 rounded-2xl shadow-xl p-3 grid grid-cols-5 gap-2 z-50">
+                {avatars.map((a) => (
+                  <button
+                    key={a}
+                    onClick={() => {
+                      setAvatar(a);
+                      setShowAvatarSelect(false);
+                    }}
+                    className="w-10 h-10 flex items-center justify-center text-2xl hover:bg-yellow-50 rounded-xl transition-colors"
+                  >
+                    {a}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-orange-500">
+              Khu vui chơi tiếng Anh!
+            </h1>
+            {selectedBook &&
+              selectedVolume &&
+              (view === "menu" || view === "map") && (
+                <div className="flex flex-col gap-1 mt-1">
+                  <span className="text-sm font-bold text-slate-500">
+                    {allBooks.find((b) => b.id === selectedBook)?.name ||
+                      selectedBook}{" "}
+                    - Tập {selectedVolume}
+                  </span>
+                  {view === "menu" && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-orange-400 font-bold bg-orange-50 px-3 py-1 rounded-full border-2 border-orange-200">
+                        Đang luyện: {levels.find((l) => l.id === level)?.emoji}{" "}
+                        {levels.find((l) => l.id === level)?.name}
+                      </span>
+                      <button
+                        onClick={() => setView("map")}
+                        className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-orange-500 transition-colors"
+                      >
+                        <Map className="w-4 h-4" /> Bản đồ
+                      </button>
+                    </div>
+                  )}
+                  {view === "map" && (
+                    <p className="text-orange-400 font-bold">
+                      Khám phá hành trình học tập!
+                    </p>
+                  )}
+                </div>
+              )}
+          </div>
+        </div>
+        <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-yellow-100 px-4 py-2 rounded-full font-bold text-yellow-600 border-2 border-yellow-200 shadow-sm">
+              <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+              <span className="text-xl">{stars}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-orange-100 px-4 py-2 rounded-full font-bold text-orange-600 border-2 border-orange-200 shadow-sm">
+              <span className="text-xl">🎯 {points}</span>
+            </div>
+          </div>
+          <button
+            onClick={onBack}
+            className="px-5 py-2.5 text-sm font-black text-orange-500 bg-orange-50 hover:bg-orange-100 rounded-full transition-colors border-2 border-orange-200 shadow-sm"
+          >
+            Về trang chủ
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-100 text-red-600 p-4 rounded-2xl mb-6 font-bold text-center border-2 border-red-200">
+          Oops! Có lỗi xảy ra: {error}
+        </div>
+      )}
+
+      {/* Books View */}
+      {view === "books" && !gameMode && (
+        <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative animate-in fade-in slide-in-from-bottom-4">
+          <h2 className="text-3xl font-black text-center text-slate-800 mb-2">
+            Chọn Bộ Sách Của Bé
+          </h2>
+          <p className="text-center font-bold text-slate-500 mb-8">
+            Bé đang học bộ sách nào nhỉ? Hãy chọn để bắt đầu khám phá nha!
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+            {allBooks.map((book) => (
+              <button
+                key={book.id}
+                onClick={() => {
+                  setSelectedBook(book.id);
+                  setView("volumes");
+                }}
+                className={`p-6 rounded-3xl border-4 transition-all shadow-sm hover:shadow-md flex flex-col items-center justify-center text-center gap-4 group ${book.color}`}
+              >
+                <div className="bg-white/50 p-4 rounded-full group-hover:scale-110 transition-transform">
+                  <BookOpen className="w-10 h-10" />
+                </div>
+                <h3 className="text-xl font-black">{book.name}</h3>
+              </button>
+            ))}
+
+            <button
+              onClick={() => setShowAddBook(true)}
+              className="p-6 rounded-3xl border-4 border-dashed border-slate-300 bg-slate-50 text-slate-500 hover:bg-slate-100 hover:border-slate-400 transition-all flex flex-col items-center justify-center text-center gap-4"
+            >
+              <div className="bg-white p-4 rounded-full shadow-sm">
+                <Plus className="w-10 h-10" />
+              </div>
+              <h3 className="text-xl font-bold">Thêm Bộ Sách Khác</h3>
+            </button>
+          </div>
+
+          {showAddBook && (
+            <div className="bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 animate-in zoom-in-95">
+              <h4 className="text-lg font-bold text-slate-800 mb-4">
+                Tên bộ sách mới:
+              </h4>
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  value={newBookName}
+                  onChange={(e) => setNewBookName(e.target.value)}
+                  placeholder="Nhập tên bộ sách..."
+                  className="flex-1 px-4 py-3 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-blue-400 font-bold"
+                  autoFocus
+                />
+                <button
+                  onClick={handleAddBook}
+                  disabled={!newBookName.trim()}
+                  className="px-6 py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Thêm
+                </button>
+                <button
+                  onClick={() => setShowAddBook(false)}
+                  className="px-6 py-3 bg-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-300 transition-colors"
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Volumes View */}
+      {view === "volumes" && !gameMode && (
+        <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative animate-in fade-in slide-in-from-bottom-4">
+          <div className="absolute top-4 left-4">
+            <button
+              onClick={() => setView("books")}
+              className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-orange-500 transition-colors bg-slate-50 px-3 py-2 rounded-xl border-2 border-slate-200"
+            >
+              <ArrowLeft className="w-4 h-4" /> Quay lại
+            </button>
+          </div>
+          <h2 className="text-3xl font-black text-center text-slate-800 mb-2 mt-4 sm:mt-0">
+            Chọn Tập Sách
+          </h2>
+          <p className="text-center font-bold text-slate-500 mb-8">
+            Bé đang học tới tập mấy rồi nhỉ?
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {(selectedBook === "global_success" || selectedBook === "starters"
+              ? [1, 2]
+              : [1, 2, 3, 4, 5]
+            ).map((vol) => (
+              <button
+                key={vol}
+                onClick={() => {
+                  setSelectedVolume(vol);
+                  if (
+                    selectedBook === "family_friends" ||
+                    selectedBook === "global_success" ||
+                    selectedBook === "starters"
+                  ) {
+                    setLevel(
+                      selectedBook === "global_success" && vol === 2
+                        ? "Unit 11"
+                        : "Unit 1",
+                    );
+                  } else {
+                    setLevel("Stage 1");
+                  }
+                  setView("map");
+                }}
+                className={`p-6 rounded-3xl border-4 transition-all shadow-sm hover:shadow-md flex flex-col items-center justify-center text-center gap-3 ${
+                  selectedVolume === vol
+                    ? "bg-orange-100 text-orange-600 border-orange-400"
+                    : "bg-slate-50 text-slate-600 border-slate-200 hover:border-orange-300 hover:bg-orange-50"
+                }`}
+              >
+                <div className="text-4xl font-black">{vol}</div>
+                <div className="font-bold">
+                  {selectedBook === "starters"
+                    ? vol === 1
+                      ? "Get ready"
+                      : "Fun for Starters"
+                    : `Tập ${vol}`}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Map View */}
+      {view === "map" && !gameMode && (
+        <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative">
+          <div className="absolute top-4 left-4">
+            <button
+              onClick={() => setView("books")}
+              className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-orange-500 transition-colors bg-slate-50 px-3 py-2 rounded-xl border-2 border-slate-200"
+            >
+              <BookOpen className="w-4 h-4" /> Chọn Sách Khác
+            </button>
+          </div>
+          <h2 className="text-3xl font-black text-center text-slate-800 mb-2 mt-4 sm:mt-0">
+            Hành Trình Của Bé
+          </h2>
+          <p className="text-center font-bold text-slate-500 mb-12">
+            Hoàn thành các trò chơi để mở khóa chặng tiếp theo nhé!
+          </p>
+          <KidJourneyMap
+            levels={levels}
+            currentLevelIndex={activeLevelIndex}
+            levelStars={levelStars}
+            avatar={avatar}
+            onSelectLevel={(id) => {
+              setLevel(id);
+              setView("menu");
+            }}
+          />
+        </div>
+      )}
+
+      {/* Main Menu (Games for selected level) */}
+      {view === "menu" && !gameMode && (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+          {selectedBook === "starters" && selectedVolume === 2 ? (
+            <div>
+              <h2 className="text-3xl font-black text-amber-500 mb-6 flex items-center justify-center gap-2">
+                <Star className="w-10 h-10 fill-amber-400 text-amber-400" />
+                Cambridge YLE Starters
+              </h2>
+              <p className="text-center font-bold text-slate-500 mb-8 text-lg">
+                Thử sức với các dạng bài thi Cambridge Starters nhé!
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <button
+                  onClick={() => fetchGame("kids_listening", "kids_listening")}
+                  disabled={loading !== null}
+                  className="relative flex flex-col items-center justify-center p-8 bg-indigo-50 border-4 border-indigo-200 rounded-3xl shadow-sm hover:border-indigo-400 hover:-translate-y-2 transition-all group disabled:opacity-50"
+                >
+                  {renderStars("kids_listening")}
+                  <div className="p-5 bg-white rounded-2xl mb-4 group-hover:scale-110 transition-transform border-4 border-indigo-100 text-indigo-500 shadow-sm group-hover:rotate-6">
+                    <Headphones className="w-10 h-10" />
+                  </div>
+                  <h3 className="font-black text-xl text-indigo-800 mb-2">
+                    Listening
+                  </h3>
+                  <p className="text-sm font-bold text-indigo-600/80 text-center">
+                    Nghe và Chọn màu
+                  </p>
+                  {loading === "kids_listening" && (
+                    <Loader2 className="w-6 h-6 text-indigo-500 mt-4 animate-spin" />
+                  )}
+                </button>
+                <button
+                  onClick={() => fetchGame("kids_reading", "kids_reading")}
+                  disabled={loading !== null}
+                  className="relative flex flex-col items-center justify-center p-8 bg-amber-50 border-4 border-amber-200 rounded-3xl shadow-sm hover:border-amber-400 hover:-translate-y-2 transition-all group disabled:opacity-50"
+                >
+                  {renderStars("kids_reading")}
+                  <div className="p-5 bg-white rounded-2xl mb-4 group-hover:scale-110 transition-transform border-4 border-amber-100 text-amber-500 shadow-sm group-hover:-rotate-6">
+                    <BookOpen className="w-10 h-10" />
+                  </div>
+                  <h3 className="font-black text-xl text-amber-800 mb-2">
+                    Reading
+                  </h3>
+                  <p className="text-sm font-bold text-amber-600/80 text-center">
+                    Đọc hiểu Đúng/Sai
+                  </p>
+                  {loading === "kids_reading" && (
+                    <Loader2 className="w-6 h-6 text-amber-500 mt-4 animate-spin" />
+                  )}
+                </button>
+                <button
+                  onClick={() => fetchGame("kids_speaking", "kids_speaking")}
+                  disabled={loading !== null}
+                  className="relative flex flex-col items-center justify-center p-8 bg-emerald-50 border-4 border-emerald-200 rounded-3xl shadow-sm hover:border-emerald-400 hover:-translate-y-2 transition-all group disabled:opacity-50"
+                >
+                  {renderStars("kids_speaking")}
+                  <div className="p-5 bg-white rounded-2xl mb-4 group-hover:scale-110 transition-transform border-4 border-emerald-100 text-emerald-500 shadow-sm group-hover:rotate-6">
+                    <Mic className="w-10 h-10" />
+                  </div>
+                  <h3 className="font-black text-xl text-emerald-800 mb-2">
+                    Speaking
+                  </h3>
+                  <p className="text-sm font-bold text-emerald-600/80 text-center">
+                    Mô tả tranh tương tác
+                  </p>
+                  {loading === "kids_speaking" && (
+                    <Loader2 className="w-6 h-6 text-emerald-500 mt-4 animate-spin" />
+                  )}
+                </button>
+                <button
+                  onClick={() => fetchGame("kids_vocabulary", "match")}
+                  disabled={loading !== null}
+                  className="relative flex flex-col items-center justify-center p-8 bg-rose-50 border-4 border-rose-200 rounded-3xl shadow-sm hover:border-rose-400 hover:-translate-y-2 transition-all group disabled:opacity-50"
+                >
+                  {renderStars("match")}
+                  <div className="p-5 bg-white rounded-2xl mb-4 group-hover:scale-110 transition-transform border-4 border-rose-100 text-rose-500 shadow-sm group-hover:-rotate-6">
+                    <Puzzle className="w-10 h-10" />
+                  </div>
+                  <h3 className="font-black text-xl text-rose-800 mb-2">
+                    Vocabulary
+                  </h3>
+                  <p className="text-sm font-bold text-rose-600/80 text-center">
+                    Ghép từ và hình
+                  </p>
+                  {loading === "match" && (
+                    <Loader2 className="w-6 h-6 text-rose-500 mt-4 animate-spin" />
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Vocabulary Games */}
+              <div>
+                <h2 className="text-2xl font-black text-blue-500 mb-4 flex items-center gap-2">
+                  <Gamepad2 className="w-8 h-8" />
+                  Trò Chơi Từ Vựng
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                  <button
+                    onClick={() => fetchGame("kids_vocabulary", "matrix")}
+                    disabled={loading !== null}
+                    className="relative flex items-center gap-6 p-6 bg-white border-4 border-blue-200 rounded-3xl shadow-sm hover:border-blue-400 hover:shadow-md transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("matrix")}
+                    <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform group-hover:rotate-6 border-2 border-blue-200">
+                      <Gamepad2 className="w-8 h-8" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <h3 className="text-xl font-black text-slate-800 mb-1">
+                        Ma Trận Trí Nhớ
+                      </h3>
+                      <p className="font-bold text-slate-500 text-sm">
+                        Tìm và ghép hình với từ tiếng Anh tương ứng.
+                      </p>
+                    </div>
+                    {loading === "matrix" && (
+                      <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => fetchGame("kids_vocabulary", "match")}
+                    disabled={loading !== null}
+                    className="relative flex items-center gap-6 p-6 bg-white border-4 border-purple-200 rounded-3xl shadow-sm hover:border-purple-400 hover:shadow-md transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("match")}
+                    <div className="w-16 h-16 rounded-2xl bg-purple-100 text-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform group-hover:-rotate-6 border-2 border-purple-200">
+                      <Link2 className="w-8 h-8" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <h3 className="text-xl font-black text-slate-800 mb-1">
+                        Nối Từ Siêu Tốc
+                      </h3>
+                      <p className="font-bold text-slate-500 text-sm">
+                        Nối từ tiếng Anh với nghĩa tiếng Việt cho đúng.
+                      </p>
+                    </div>
+                    {loading === "match" && (
+                      <Loader2 className="w-6 h-6 text-purple-500 animate-spin" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Creative Games */}
+              <div>
+                <h2 className="text-2xl font-black text-rose-500 mb-4 flex items-center gap-2">
+                  <Star className="w-8 h-8" />
+                  Trò Chơi Sáng Tạo
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <button
+                    onClick={() =>
+                      fetchGame("kids_vocabulary", "balloon_match")
+                    }
+                    disabled={loading !== null}
+                    className="relative flex items-center gap-6 p-6 bg-white border-4 border-pink-200 rounded-3xl shadow-sm hover:border-pink-400 hover:shadow-md transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("balloon_match")}
+                    <div className="w-16 h-16 rounded-2xl bg-pink-100 text-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform group-hover:-rotate-6 border-2 border-pink-200">
+                      <div className="w-8 h-8 border-4 border-pink-400 rounded-full" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <h3 className="text-xl font-black text-slate-800 mb-1">
+                        Ghép Bóng Đôi
+                      </h3>
+                      <p className="font-bold text-slate-500 text-sm">
+                        Ghép bóng chữ cái thành các cặp đôi.
+                      </p>
+                    </div>
+                    {loading === "balloon_match" && (
+                      <Loader2 className="w-6 h-6 text-pink-500 animate-spin" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => fetchGame("kids_vocabulary", "sound_memory")}
+                    disabled={loading !== null}
+                    className="relative flex items-center gap-6 p-6 bg-white border-4 border-amber-200 rounded-3xl shadow-sm hover:border-amber-400 hover:shadow-md transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("sound_memory")}
+                    <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform group-hover:rotate-6 border-2 border-amber-200">
+                      <Volume2 className="w-8 h-8" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <h3 className="text-xl font-black text-slate-800 mb-1">
+                        Thẻ Nhớ Âm Thanh
+                      </h3>
+                      <p className="font-bold text-slate-500 text-sm">
+                        Lắng nghe và tìm cặp thẻ chữ.
+                      </p>
+                    </div>
+                    {loading === "sound_memory" && (
+                      <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      fetchGame("kids_vocabulary", "magic_coloring")
+                    }
+                    disabled={loading !== null}
+                    className="relative flex items-center gap-6 p-6 bg-white border-4 border-emerald-200 rounded-3xl shadow-sm hover:border-emerald-400 hover:shadow-md transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("magic_coloring")}
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform group-hover:-rotate-6 border-2 border-emerald-200">
+                      <PenTool className="w-8 h-8" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <h3 className="text-xl font-black text-slate-800 mb-1">
+                        Tô Màu Biến Hình
+                      </h3>
+                      <p className="font-bold text-slate-500 text-sm">
+                        Tìm chữ đúng để hô biến màu sắc.
+                      </p>
+                    </div>
+                    {loading === "magic_coloring" && (
+                      <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Skills Training */}
+              <div>
+                <h2 className="text-2xl font-black text-emerald-500 mb-4 flex items-center gap-2">
+                  <Star className="w-8 h-8" />
+                  Phát Triển Kỹ Năng
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <button
+                    onClick={() =>
+                      fetchGame("kids_listening", "kids_listening")
+                    }
+                    disabled={loading !== null}
+                    className="relative flex flex-col items-center justify-center p-6 bg-indigo-50 border-4 border-indigo-200 rounded-3xl shadow-sm hover:border-indigo-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("kids_listening")}
+                    <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-indigo-100 text-indigo-500">
+                      <Headphones className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-black text-indigo-800">Luyện Nghe</h3>
+                    {loading === "kids_listening" && (
+                      <Loader2 className="w-5 h-5 text-indigo-500 mt-2 animate-spin" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => fetchGame("kids_phonics", "kids_phonics")}
+                    disabled={loading !== null}
+                    className="relative flex flex-col items-center justify-center p-6 bg-pink-50 border-4 border-pink-200 rounded-3xl shadow-sm hover:border-pink-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("kids_phonics")}
+                    <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-pink-100 text-pink-500">
+                      <Volume2 className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-black text-pink-800">Phát Âm</h3>
+                    {loading === "kids_phonics" && (
+                      <Loader2 className="w-5 h-5 text-pink-500 mt-2 animate-spin" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => fetchGame("kids_speaking", "kids_speaking")}
+                    disabled={loading !== null}
+                    className="relative flex flex-col items-center justify-center p-6 bg-emerald-50 border-4 border-emerald-200 rounded-3xl shadow-sm hover:border-emerald-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("kids_speaking")}
+                    <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-emerald-100 text-emerald-500">
+                      <Mic className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-black text-emerald-800">Luyện Nói</h3>
+                    {loading === "kids_speaking" && (
+                      <Loader2 className="w-5 h-5 text-emerald-500 mt-2 animate-spin" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => fetchGame("kids_reading", "kids_reading")}
+                    disabled={loading !== null}
+                    className="relative flex flex-col items-center justify-center p-6 bg-amber-50 border-4 border-amber-200 rounded-3xl shadow-sm hover:border-amber-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("kids_reading")}
+                    <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-amber-100 text-amber-500">
+                      <BookOpen className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-black text-amber-800">Luyện Đọc</h3>
+                    {loading === "kids_reading" && (
+                      <Loader2 className="w-5 h-5 text-amber-500 mt-2 animate-spin" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => fetchGame("kids_writing", "kids_writing")}
+                    disabled={loading !== null}
+                    className="relative flex flex-col items-center justify-center p-6 bg-rose-50 border-4 border-rose-200 rounded-3xl shadow-sm hover:border-rose-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+                  >
+                    {renderStars("kids_writing")}
+                    <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-rose-100 text-rose-500">
+                      <PenTool className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-black text-rose-800">Luyện Viết</h3>
+                    {loading === "kids_writing" && (
+                      <Loader2 className="w-5 h-5 text-rose-500 mt-2 animate-spin" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Next Level Button */}
+          <div className="flex justify-center gap-4 mt-8 animate-in fade-in zoom-in">
+            {isLevelComplete && (
+              <button
+                onClick={handleNextLevel}
+                className="flex items-center gap-2 px-8 py-4 bg-orange-500 text-white rounded-full font-black text-xl hover:bg-orange-600 hover:scale-105 transition-all shadow-lg border-4 border-orange-300"
+              >
+                Tiếp tục cuộc hành trình{" "}
+                <ChevronDown className="w-6 h-6 -rotate-90" />
+              </button>
+            )}
+            {/* TEMPORARY TEST BUTTON */}
+            <button
+              onClick={handleNextLevel}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-600 rounded-full font-bold text-sm hover:bg-slate-300 transition-all border-2 border-slate-300"
+            >
+              [Test] Chuyển Unit
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Game Views */}
+      <div className="space-y-8">
+        {gameMode === "matrix" && flashcards.length > 0 && (
+          <div className="animate-in fade-in slide-in-from-bottom-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-blue-600 drop-shadow-sm">
+                🧠 Ma Trận Trí Nhớ 🧠
+              </h2>
+              <button
+                onClick={() => setGameMode(null)}
+                className="px-5 py-2 font-bold text-slate-500 bg-slate-100 rounded-full hover:bg-slate-200 border-2 border-slate-200"
+              >
+                Bỏ cuộc
+              </button>
+            </div>
+            <KidMemoryMatrix cards={flashcards} onWin={handleWin} />
+          </div>
+        )}
+
+        {gameMode === "match" && flashcards.length > 0 && (
+          <div className="animate-in fade-in slide-in-from-bottom-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-purple-600 drop-shadow-sm">
+                🧩 Trò chơi Nối từ 🧩
+              </h2>
+              <button
+                onClick={() => setGameMode(null)}
+                className="px-5 py-2 font-bold text-slate-500 bg-slate-100 rounded-full hover:bg-slate-200 border-2 border-slate-200"
+              >
+                Bỏ cuộc
+              </button>
+            </div>
+            <KidWordMatch
+              cards={flashcards}
+              onWin={handleWin}
+              volume={selectedVolume || 1}
+              level={level}
+            />
+          </div>
+        )}
+
+        {gameMode === "balloon_match" && flashcards.length > 0 && (
+          <div className="animate-in fade-in slide-in-from-bottom-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-pink-600 drop-shadow-sm">
+                🫧 Ghép Bóng Đôi 🫧
+              </h2>
+              <button
+                onClick={() => setGameMode(null)}
+                className="px-5 py-2 font-bold text-slate-500 bg-slate-100 rounded-full hover:bg-slate-200 border-2 border-slate-200"
+              >
+                Bỏ cuộc
+              </button>
+            </div>
+            <BalloonMatch cards={flashcards} onWin={handleWin} />
+          </div>
+        )}
+
+        {gameMode === "sound_memory" && flashcards.length > 0 && (
+          <div className="animate-in fade-in slide-in-from-bottom-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-amber-600 drop-shadow-sm">
+                🎵 Thẻ Nhớ Âm Thanh 🎵
+              </h2>
+              <button
+                onClick={() => setGameMode(null)}
+                className="px-5 py-2 font-bold text-slate-500 bg-slate-100 rounded-full hover:bg-slate-200 border-2 border-slate-200"
+              >
+                Bỏ cuộc
+              </button>
+            </div>
+            <SoundMemory cards={flashcards} onWin={handleWin} />
+          </div>
+        )}
+
+        {gameMode === "magic_coloring" && flashcards.length > 0 && (
+          <div className="animate-in fade-in slide-in-from-bottom-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-emerald-600 drop-shadow-sm">
+                🎨 Tô Màu Biến Hình 🎨
+              </h2>
+              <button
+                onClick={() => setGameMode(null)}
+                className="px-5 py-2 font-bold text-slate-500 bg-slate-100 rounded-full hover:bg-slate-200 border-2 border-slate-200"
+              >
+                Bỏ cuộc
+              </button>
+            </div>
+            <MagicColoring cards={flashcards} onWin={handleWin} />
+          </div>
+        )}
+
+        {[
+          "kids_listening",
+          "kids_speaking",
+          "kids_phonics",
+          "kids_reading",
+          "kids_writing",
+        ].includes(gameMode || "") &&
+          skillData && (
+            <div className="animate-in fade-in slide-in-from-bottom-8">
+              <div className="flex items-center justify-between mb-6 max-w-3xl mx-auto">
+                <h2 className="text-2xl font-black text-slate-800 drop-shadow-sm flex items-center gap-2">
+                  <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+                  Thử thách Kỹ Năng
+                </h2>
+                <button
+                  onClick={() => setGameMode(null)}
+                  className="px-5 py-2 font-bold text-slate-500 bg-slate-100 rounded-full hover:bg-slate-200 border-2 border-slate-200"
+                >
+                  Quay lại
+                </button>
+              </div>
+              <KidSkillGame
+                data={skillData}
+                type={gameMode!}
+                onComplete={handleWin}
+              />
+            </div>
+          )}
+      </div>
+    </div>
+  );
+}
