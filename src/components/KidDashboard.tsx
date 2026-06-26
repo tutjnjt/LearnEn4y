@@ -853,6 +853,24 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
 
   let levels = defaultLevels;
   if (selectedBook && selectedVolume) {
+    const generateUnits = (
+      prefix: string,
+      count: number,
+      baseTopics: string[] = [],
+    ) => {
+      return Array.from({ length: count }, (_, i) => {
+        const topic = baseTopics[i] || `${prefix} Topic ${i + 1}`;
+        return {
+          id: `Unit ${i + 1}`,
+          name: `Unit ${i + 1}`,
+          topic,
+          emoji: ["📚", "🌟", "🎈", "🎨", "🚀", "🐶", "🍎", "🚗", "🧸", "⚽"][
+            i % 10
+          ],
+        };
+      });
+    };
+
     if (selectedBook === "family_friends") {
       if (selectedVolume === 1) levels = FAF1_UNITS;
       else if (selectedVolume === 2) levels = FAF2_UNITS;
@@ -862,6 +880,76 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
     } else if (selectedBook === "global_success") {
       if (selectedVolume === 1) levels = GS1_UNITS;
       else if (selectedVolume === 2) levels = GS2_UNITS;
+      else if (selectedVolume === 3)
+        levels = generateUnits("Global Success 3", 20, [
+          "Hello",
+          "Our names",
+          "Our friends",
+          "Our bodies",
+          "My hobbies",
+          "Our school",
+          "Classroom instructions",
+          "My school things",
+          "Colours",
+          "Break time activities",
+          "My family",
+          "Jobs",
+          "My house",
+          "My bedroom",
+          "At the dining table",
+          "My pets",
+          "Our toys",
+          "Playing outside",
+          "Outdoor activities",
+          "At the summer camp",
+        ]);
+      else if (selectedVolume === 4)
+        levels = generateUnits("Global Success 4", 20, [
+          "My friends",
+          "Time and daily routines",
+          "My week",
+          "My birthday party",
+          "Things we can do",
+          "Our school facilities",
+          "Our timetables",
+          "My favourite subjects",
+          "Our sports day",
+          "Our summer holidays",
+          "My home",
+          "Jobs",
+          "Appearance",
+          "Daily activities",
+          "My family's weekends",
+          "Weather",
+          "In the city",
+          "At the shopping centre",
+          "The animal world",
+          "Our summer camp",
+        ]);
+      else if (selectedVolume === 5)
+        levels = generateUnits("Global Success 5", 20, [
+          "All about me",
+          "Our new friends",
+          "Our town",
+          "Our free time activities",
+          "Our summer holidays",
+          "At school",
+          "Our favourite subjects",
+          "Our school events",
+          "Our outdoor activities",
+          "Our school trips",
+          "Family time",
+          "Jobs",
+          "At the restaurant",
+          "Shopping",
+          "Special days",
+          "Weather and seasons",
+          "In the countryside",
+          "At the beach",
+          "Animals in the wild",
+          "Protecting the environment",
+        ]);
+      else levels = generateUnits("Global Success", 20);
     } else if (selectedBook === "starters") {
       if (selectedVolume === 1) levels = STARTERS1_UNITS;
       else if (selectedVolume === 2) levels = STARTERS2_UNITS;
@@ -1078,45 +1166,44 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {(selectedBook === "global_success" || selectedBook === "starters"
-              ? [1, 2]
-              : [1, 2, 3, 4, 5]
-            ).map((vol) => (
-              <button
-                key={vol}
-                onClick={() => {
-                  setSelectedVolume(vol);
-                  if (
-                    selectedBook === "family_friends" ||
-                    selectedBook === "global_success" ||
-                    selectedBook === "starters"
-                  ) {
-                    setLevel(
-                      selectedBook === "global_success" && vol === 2
-                        ? "Unit 11"
-                        : "Unit 1",
-                    );
-                  } else {
-                    setLevel("Stage 1");
-                  }
-                  setView("map");
-                }}
-                className={`p-6 rounded-3xl border-4 transition-all shadow-sm hover:shadow-md flex flex-col items-center justify-center text-center gap-3 ${
-                  selectedVolume === vol
-                    ? "bg-orange-100 text-orange-600 border-orange-400"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:border-orange-300 hover:bg-orange-50"
-                }`}
-              >
-                <div className="text-4xl font-black">{vol}</div>
-                <div className="font-bold">
-                  {selectedBook === "starters"
-                    ? vol === 1
-                      ? "Get ready"
-                      : "Fun for Starters"
-                    : `Tập ${vol}`}
-                </div>
-              </button>
-            ))}
+            {(selectedBook === "starters" ? [1, 2] : [1, 2, 3, 4, 5]).map(
+              (vol) => (
+                <button
+                  key={vol}
+                  onClick={() => {
+                    setSelectedVolume(vol);
+                    if (
+                      selectedBook === "family_friends" ||
+                      selectedBook === "global_success" ||
+                      selectedBook === "starters"
+                    ) {
+                      setLevel(
+                        selectedBook === "global_success" && vol === 2
+                          ? "Unit 11"
+                          : "Unit 1",
+                      );
+                    } else {
+                      setLevel("Stage 1");
+                    }
+                    setView("map");
+                  }}
+                  className={`p-6 rounded-3xl border-4 transition-all shadow-sm hover:shadow-md flex flex-col items-center justify-center text-center gap-3 ${
+                    selectedVolume === vol
+                      ? "bg-orange-100 text-orange-600 border-orange-400"
+                      : "bg-slate-50 text-slate-600 border-slate-200 hover:border-orange-300 hover:bg-orange-50"
+                  }`}
+                >
+                  <div className="text-4xl font-black">{vol}</div>
+                  <div className="font-bold">
+                    {selectedBook === "starters"
+                      ? vol === 1
+                        ? "Get ready"
+                        : "Fun for Starters"
+                      : `Tập ${vol}`}
+                  </div>
+                </button>
+              ),
+            )}
           </div>
         </div>
       )}
