@@ -20,6 +20,7 @@ import { KidMemoryMatrix } from "./KidMemoryMatrix";
 import { KidWordMatch } from "./KidWordMatch";
 import { KidSkillGame } from "./KidSkillGame";
 import { KidJourneyMap } from "./KidJourneyMap";
+import { KidReportModal } from "./KidReportModal";
 import BalloonMatch from "./games/BalloonMatch";
 import SoundMemory from "./games/SoundMemory";
 import MagicColoring from "./games/MagicColoring";
@@ -33,6 +34,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   const [level, setLevel] = useState("Level 1");
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedVolume, setSelectedVolume] = useState<number | null>(null);
+  const [showReportForLevel, setShowReportForLevel] = useState<string | null>(null);
   const [customBooks, setCustomBooks] = useState<
     { id: string; name: string; color: string }[]
   >([]);
@@ -1014,7 +1016,10 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   const computedLevelStars: Record<string, number> = {};
   levels.forEach(l => {
     const starsObj = gameStars[l.id] || {};
-    const totalEarned = Object.values(starsObj).reduce((sum, s) => sum + s, 0);
+    let totalEarned = 0;
+    for (const key in starsObj) {
+      totalEarned += starsObj[key];
+    }
     const maxPossible = ALL_GAMES.length * 5;
     computedLevelStars[l.id] = maxPossible > 0 ? Math.round((totalEarned / maxPossible) * 5) : 0;
   });
@@ -1255,9 +1260,25 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           <h2 className="text-3xl font-black text-center text-slate-800 mb-2 mt-4 sm:mt-0">
             Hành Trình Của Bé
           </h2>
-          <p className="text-center font-bold text-slate-500 mb-12">
+          <p className="text-center font-bold text-slate-500 mb-6">
             Hoàn thành các trò chơi để mở khóa chặng tiếp theo nhé!
           </p>
+          
+          <div className="max-w-md mx-auto mb-10 bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 shadow-sm">
+            <div className="flex justify-between items-end mb-2">
+              <span className="font-bold text-slate-600">Tiến độ hoàn thành:</span>
+              <span className="text-2xl font-black text-orange-500">
+                {levels.length > 0 ? Math.round((levels.filter(l => completedLevels[l.id]).length / levels.length) * 100) : 0}%
+              </span>
+            </div>
+            <div className="h-4 w-full bg-slate-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-orange-400 rounded-full transition-all duration-1000" 
+                style={{ width: `${levels.length > 0 ? Math.round((levels.filter(l => completedLevels[l.id]).length / levels.length) * 100) : 0}%` }} 
+              />
+            </div>
+          </div>
+
           <KidJourneyMap
             levels={levels}
             currentLevelIndex={activeLevelIndex}
@@ -1585,14 +1606,22 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           )}
 
           {/* Next Level Button */}
-          <div className="flex justify-center gap-4 mt-8 animate-in fade-in zoom-in">
-            {isLevelComplete && (
+          <div className="flex justify-center gap-4 mt-8 animate-in fade-in zoom-in flex-wrap">
+            {isLevelComplete && !completedLevels[level] && (
               <button
                 onClick={handleNextLevel}
                 className="flex items-center gap-2 px-8 py-4 bg-orange-500 text-white rounded-full font-black text-xl hover:bg-orange-600 hover:scale-105 transition-all shadow-lg border-4 border-orange-300"
               >
                 Tiếp tục cuộc hành trình{" "}
                 <ChevronDown className="w-6 h-6 -rotate-90" />
+              </button>
+            )}
+            {completedLevels[level] && (
+              <button
+                onClick={() => setShowReportForLevel(level)}
+                className="flex items-center gap-2 px-6 py-4 bg-blue-500 text-white rounded-full font-black text-xl hover:bg-blue-600 hover:scale-105 transition-all shadow-lg border-4 border-blue-300"
+              >
+                <FileText className="w-6 h-6" /> Xem Báo Cáo Chặng Này
               </button>
             )}
             {/* TEMPORARY TEST BUTTON */}
@@ -1754,6 +1783,16 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
             </button>
           </div>
         </div>
+      )}
+      {showReportForLevel && selectedBook && selectedVolume && (
+        <KidReportModal
+          book={allBooks.find((b) => b.id === selectedBook)?.name || selectedBook}
+          volume={selectedVolume}
+          topic={levels.find((l) => l.id === showReportForLevel)?.name || ""}
+          level={levels.find((l) => l.id === showReportForLevel) || { id: "Level 1", name: "Level 1", emoji: "⭐" }}
+          stars={computedLevelStars[showReportForLevel] || 5}
+          onClose={() => setShowReportForLevel(null)}
+        />
       )}
     </div>
   );
