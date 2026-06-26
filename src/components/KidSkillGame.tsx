@@ -103,10 +103,10 @@ export function KidSkillGame({
     });
 
     const matchRate = matchCount / targetWords.length;
-    // Require at least 85% of the words to be spoken, and match rate to be high
-    const isLengthSufficient = spokenWords.length >= targetWords.length * 0.85;
+    // Require at least 60% of the words to be spoken, and match rate to be high
+    const isLengthSufficient = spokenWords.length >= targetWords.length * 0.6;
 
-    if (matchRate >= 0.85 && isLengthSufficient) {
+    if (matchRate >= 0.6 && isLengthSufficient) {
       setFeedback("Tuyệt vời! Bé đọc rất chuẩn. 🌟");
       setIsCorrect(true);
     } else {

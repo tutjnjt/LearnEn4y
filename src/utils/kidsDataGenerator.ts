@@ -1,132 +1,164 @@
-export const KIDS_DICTIONARY = [
-  { word: "Cat", meaning_vi: "Con mèo", emoji: "🐱" },
-  { word: "Dog", meaning_vi: "Con chó", emoji: "🐶" },
-  { word: "Bird", meaning_vi: "Con chim", emoji: "🐦" },
-  { word: "Fish", meaning_vi: "Con cá", emoji: "🐟" },
-  { word: "Apple", meaning_vi: "Quả táo", emoji: "🍎" },
-  { word: "Banana", meaning_vi: "Quả chuối", emoji: "🍌" },
-  { word: "Car", meaning_vi: "Ô tô", emoji: "🚗" },
-  { word: "Sun", meaning_vi: "Mặt trời", emoji: "☀️" },
-  { word: "Moon", meaning_vi: "Mặt trăng", emoji: "🌙" },
-  { word: "Star", meaning_vi: "Ngôi sao", emoji: "⭐" },
-  { word: "Tree", meaning_vi: "Cái cây", emoji: "🌳" },
-  { word: "Flower", meaning_vi: "Bông hoa", emoji: "🌸" },
-  { word: "Book", meaning_vi: "Quyển sách", emoji: "📖" },
-  { word: "Pencil", meaning_vi: "Bút chì", emoji: "✏️" },
-  { word: "Chair", meaning_vi: "Cái ghế", emoji: "🪑" },
-  { word: "Table", meaning_vi: "Cái bàn", emoji: "🪵" },
-  { word: "Water", meaning_vi: "Nước", emoji: "💧" },
-  { word: "Milk", meaning_vi: "Sữa", emoji: "🥛" },
-  { word: "Bread", meaning_vi: "Bánh mì", emoji: "🍞" },
-  { word: "Egg", meaning_vi: "Quả trứng", emoji: "🥚" },
-  { word: "Hat", meaning_vi: "Cái mũ", emoji: "🧢" },
-  { word: "Shoes", meaning_vi: "Đôi giày", emoji: "👟" },
-  { word: "Shirt", meaning_vi: "Áo sơ mi", emoji: "👕" },
-  { word: "Pants", meaning_vi: "Quần dài", emoji: "👖" },
-  { word: "House", meaning_vi: "Ngôi nhà", emoji: "🏠" },
-  { word: "Door", meaning_vi: "Cửa ra vào", emoji: "🚪" },
-  { word: "Window", meaning_vi: "Cửa sổ", emoji: "🪟" },
-  { word: "Bed", meaning_vi: "Cái giường", emoji: "🛏️" },
-  { word: "Clock", meaning_vi: "Đồng hồ", emoji: "⏰" },
-  { word: "Phone", meaning_vi: "Điện thoại", emoji: "📱" },
-  { word: "Train", meaning_vi: "Tàu hỏa", emoji: "🚂" },
-  { word: "Plane", meaning_vi: "Máy bay", emoji: "✈️" },
-  { word: "Boat", meaning_vi: "Con thuyền", emoji: "⛵" },
-  { word: "Bus", meaning_vi: "Xe buýt", emoji: "🚌" },
-  { word: "Bike", meaning_vi: "Xe đạp", emoji: "🚲" },
-  { word: "Rain", meaning_vi: "Mưa", emoji: "🌧️" },
-  { word: "Snow", meaning_vi: "Tuyết", emoji: "❄️" },
-  { word: "Wind", meaning_vi: "Gió", emoji: "💨" },
-  { word: "Fire", meaning_vi: "Lửa", emoji: "🔥" },
-  { word: "Earth", meaning_vi: "Trái đất", emoji: "🌍" },
-  { word: "Eye", meaning_vi: "Con mắt", emoji: "👁️" },
-  { word: "Ear", meaning_vi: "Cái tai", emoji: "👂" },
-  { word: "Nose", meaning_vi: "Cái mũi", emoji: "👃" },
-  { word: "Mouth", meaning_vi: "Cái miệng", emoji: "👄" },
-  { word: "Hand", meaning_vi: "Bàn tay", emoji: "✋" },
-  { word: "Foot", meaning_vi: "Bàn chân", emoji: "🦶" },
-  { word: "Hair", meaning_vi: "Mái tóc", emoji: "💇" },
-  { word: "Face", meaning_vi: "Khuôn mặt", emoji: "😊" },
-  { word: "Arm", meaning_vi: "Cánh tay", emoji: "💪" },
-  { word: "Leg", meaning_vi: "Cái chân", emoji: "🦵" },
-  { word: "Red", meaning_vi: "Màu đỏ", emoji: "🔴" },
-  { word: "Blue", meaning_vi: "Màu xanh dương", emoji: "🔵" },
-  { word: "Green", meaning_vi: "Màu xanh lá", emoji: "🟢" },
-  { word: "Yellow", meaning_vi: "Màu vàng", emoji: "🟡" },
-  { word: "Orange", meaning_vi: "Màu cam", emoji: "🟠" },
-  { word: "Purple", meaning_vi: "Màu tím", emoji: "🟣" },
-  { word: "Black", meaning_vi: "Màu đen", emoji: "⚫" },
-  { word: "White", meaning_vi: "Màu trắng", emoji: "⚪" },
-  { word: "Brown", meaning_vi: "Màu nâu", emoji: "🟤" },
-  { word: "Pink", meaning_vi: "Màu hồng", emoji: "🌸" },
-  { word: "Tiger", meaning_vi: "Con hổ", emoji: "🐯" },
-  { word: "Lion", meaning_vi: "Con sư tử", emoji: "🦁" },
-  { word: "Elephant", meaning_vi: "Con voi", emoji: "🐘" },
-  { word: "Monkey", meaning_vi: "Con khỉ", emoji: "🐵" },
-  { word: "Bear", meaning_vi: "Con gấu", emoji: "🐻" },
-  { word: "Rabbit", meaning_vi: "Con thỏ", emoji: "🐰" },
-  { word: "Pig", meaning_vi: "Con lợn", emoji: "🐷" },
-  { word: "Cow", meaning_vi: "Con bò", emoji: "🐮" },
-  { word: "Horse", meaning_vi: "Con ngựa", emoji: "🐴" },
-  { word: "Sheep", meaning_vi: "Con cừu", emoji: "🐑" },
-  { word: "Chicken", meaning_vi: "Con gà", emoji: "🐔" },
-  { word: "Duck", meaning_vi: "Con vịt", emoji: "🦆" },
-  { word: "Frog", meaning_vi: "Con ếch", emoji: "🐸" },
-  { word: "Snake", meaning_vi: "Con rắn", emoji: "🐍" },
-  { word: "Turtle", meaning_vi: "Con rùa", emoji: "🐢" },
-  { word: "Dolphin", meaning_vi: "Cá heo", emoji: "🐬" },
-  { word: "Whale", meaning_vi: "Cá voi", emoji: "🐳" },
-  { word: "Shark", meaning_vi: "Cá mập", emoji: "🦈" },
-  { word: "Octopus", meaning_vi: "Bạch tuộc", emoji: "🐙" },
-  { word: "Crab", meaning_vi: "Con cua", emoji: "🦀" },
-  { word: "Ant", meaning_vi: "Con kiến", emoji: "🐜" },
-  { word: "Bee", meaning_vi: "Con ong", emoji: "🐝" },
-  { word: "Butterfly", meaning_vi: "Con bướm", emoji: "🦋" },
-  { word: "Spider", meaning_vi: "Con nhện", emoji: "🕷️" },
-  { word: "Snail", meaning_vi: "Ốc sên", emoji: "🐌" },
-  { word: "Worm", meaning_vi: "Con giun", emoji: "🪱" },
-  { word: "Mosquito", meaning_vi: "Con muỗi", emoji: "🦟" },
-  { word: "Fly", meaning_vi: "Con ruồi", emoji: "🪰" },
-  { word: "Grass", meaning_vi: "Bãi cỏ", emoji: "🌿" },
-  { word: "Leaf", meaning_vi: "Chiếc lá", emoji: "🍂" },
-  { word: "Mountain", meaning_vi: "Ngọn núi", emoji: "⛰️" },
-  { word: "River", meaning_vi: "Dòng sông", emoji: "🏞️" },
-  { word: "Ocean", meaning_vi: "Đại dương", emoji: "🌊" },
-  { word: "Beach", meaning_vi: "Bãi biển", emoji: "🏖️" },
-  { word: "Sand", meaning_vi: "Cát", emoji: "🏜️" },
-  { word: "Rock", meaning_vi: "Hòn đá", emoji: "🪨" },
-  { word: "Cloud", meaning_vi: "Đám mây", emoji: "☁️" },
-  { word: "Sky", meaning_vi: "Bầu trời", emoji: "🌌" },
-  { word: "Umbrella", meaning_vi: "Cái ô", emoji: "☂️" },
-  { word: "Bag", meaning_vi: "Cái túi", emoji: "👜" },
-  { word: "Computer", meaning_vi: "Máy tính", emoji: "💻" },
-  { word: "Mouse", meaning_vi: "Chuột máy tính", emoji: "🖱️" },
-  { word: "Keyboard", meaning_vi: "Bàn phím", emoji: "⌨️" },
-  { word: "Camera", meaning_vi: "Máy ảnh", emoji: "📷" },
-  { word: "Television", meaning_vi: "Tivi", emoji: "📺" },
-  { word: "Radio", meaning_vi: "Đài radio", emoji: "📻" },
-  { word: "Guitar", meaning_vi: "Đàn guitar", emoji: "🎸" },
-  { word: "Piano", meaning_vi: "Đàn piano", emoji: "🎹" },
-  { word: "Drum", meaning_vi: "Cái trống", emoji: "🥁" },
-  { word: "Ball", meaning_vi: "Quả bóng", emoji: "⚽" },
-  { word: "Doll", meaning_vi: "Búp bê", emoji: "🪆" },
-  { word: "Kite", meaning_vi: "Cái diều", emoji: "🪁" },
-  { word: "Robot", meaning_vi: "Người máy", emoji: "🤖" },
-  { word: "Train", meaning_vi: "Tàu hỏa", emoji: "🚆" },
-  { word: "Block", meaning_vi: "Khối xếp hình", emoji: "🧱" },
-  { word: "Puzzle", meaning_vi: "Trò xếp hình", emoji: "🧩" },
-  { word: "Game", meaning_vi: "Trò chơi", emoji: "🎮" },
-  { word: "Apple", meaning_vi: "Quả táo", emoji: "🍎" },
-  { word: "Orange", meaning_vi: "Quả cam", emoji: "🍊" },
-  { word: "Lemon", meaning_vi: "Quả chanh", emoji: "🍋" },
-  { word: "Strawberry", meaning_vi: "Quả dâu tây", emoji: "🍓" },
-  { word: "Grapes", meaning_vi: "Quả nho", emoji: "🍇" },
-  { word: "Watermelon", meaning_vi: "Dưa hấu", emoji: "🍉" },
-  { word: "Pineapple", meaning_vi: "Quả dứa", emoji: "🍍" },
-  { word: "Mango", meaning_vi: "Quả xoài", emoji: "🥭" },
-  { word: "Peach", meaning_vi: "Quả đào", emoji: "🍑" },
-  { word: "Cherry", meaning_vi: "Quả anh đào", emoji: "🍒" },
-];
+export const KIDS_CATEGORIES: Record<
+  string,
+  { word: string; vi: string; emoji: string }[]
+> = {
+  animals: [
+    { word: "Cat", vi: "Con mèo", emoji: "🐱" },
+    { word: "Dog", vi: "Con chó", emoji: "🐶" },
+    { word: "Bird", vi: "Con chim", emoji: "🐦" },
+    { word: "Fish", vi: "Con cá", emoji: "🐟" },
+    { word: "Tiger", vi: "Con hổ", emoji: "🐯" },
+    { word: "Lion", vi: "Con sư tử", emoji: "🦁" },
+    { word: "Elephant", vi: "Con voi", emoji: "🐘" },
+    { word: "Monkey", vi: "Con khỉ", emoji: "🐵" },
+    { word: "Bear", vi: "Con gấu", emoji: "🐻" },
+    { word: "Rabbit", vi: "Con thỏ", emoji: "🐰" },
+    { word: "Pig", vi: "Con lợn", emoji: "🐷" },
+    { word: "Cow", vi: "Con bò", emoji: "🐮" },
+    { word: "Horse", vi: "Con ngựa", emoji: "🐴" },
+    { word: "Sheep", vi: "Con cừu", emoji: "🐑" },
+    { word: "Chicken", vi: "Con gà", emoji: "🐔" },
+    { word: "Duck", vi: "Con vịt", emoji: "🦆" },
+    { word: "Frog", vi: "Con ếch", emoji: "🐸" },
+    { word: "Snake", vi: "Con rắn", emoji: "🐍" },
+    { word: "Turtle", vi: "Con rùa", emoji: "🐢" },
+    { word: "Dolphin", vi: "Cá heo", emoji: "🐬" },
+    { word: "Whale", vi: "Cá voi", emoji: "🐳" },
+    { word: "Shark", vi: "Cá mập", emoji: "🦈" },
+  ],
+  food: [
+    { word: "Apple", vi: "Quả táo", emoji: "🍎" },
+    { word: "Banana", vi: "Quả chuối", emoji: "🍌" },
+    { word: "Water", vi: "Nước", emoji: "💧" },
+    { word: "Milk", vi: "Sữa", emoji: "🥛" },
+    { word: "Bread", vi: "Bánh mì", emoji: "🍞" },
+    { word: "Egg", vi: "Quả trứng", emoji: "🥚" },
+    { word: "Orange", vi: "Quả cam", emoji: "🍊" },
+    { word: "Lemon", vi: "Quả chanh", emoji: "🍋" },
+    { word: "Strawberry", vi: "Quả dâu tây", emoji: "🍓" },
+    { word: "Grapes", vi: "Quả nho", emoji: "🍇" },
+    { word: "Watermelon", vi: "Dưa hấu", emoji: "🍉" },
+    { word: "Pineapple", vi: "Quả dứa", emoji: "🍍" },
+    { word: "Mango", vi: "Quả xoài", emoji: "🥭" },
+    { word: "Peach", vi: "Quả đào", emoji: "🍑" },
+    { word: "Cherry", vi: "Quả anh đào", emoji: "🍒" },
+    { word: "Pizza", vi: "Bánh pizza", emoji: "🍕" },
+    { word: "Hamburger", vi: "Bánh kẹp thịt", emoji: "🍔" },
+    { word: "Fries", vi: "Khoai tây chiên", emoji: "🍟" },
+    { word: "Ice cream", vi: "Kem", emoji: "🍦" },
+    { word: "Cake", vi: "Bánh ngọt", emoji: "🍰" },
+  ],
+  colors: [
+    { word: "Red", vi: "Màu đỏ", emoji: "🔴" },
+    { word: "Blue", vi: "Màu xanh dương", emoji: "🔵" },
+    { word: "Green", vi: "Màu xanh lá", emoji: "🟢" },
+    { word: "Yellow", vi: "Màu vàng", emoji: "🟡" },
+    { word: "Orange", vi: "Màu cam", emoji: "🟠" },
+    { word: "Purple", vi: "Màu tím", emoji: "🟣" },
+    { word: "Black", vi: "Màu đen", emoji: "⚫" },
+    { word: "White", vi: "Màu trắng", emoji: "⚪" },
+    { word: "Brown", vi: "Màu nâu", emoji: "🟤" },
+    { word: "Pink", vi: "Màu hồng", emoji: "🌸" },
+  ],
+  nature: [
+    { word: "Sun", vi: "Mặt trời", emoji: "☀️" },
+    { word: "Moon", vi: "Mặt trăng", emoji: "🌙" },
+    { word: "Star", vi: "Ngôi sao", emoji: "⭐" },
+    { word: "Tree", vi: "Cái cây", emoji: "🌳" },
+    { word: "Flower", vi: "Bông hoa", emoji: "🌸" },
+    { word: "Rain", vi: "Mưa", emoji: "🌧️" },
+    { word: "Snow", vi: "Tuyết", emoji: "❄️" },
+    { word: "Wind", vi: "Gió", emoji: "💨" },
+    { word: "Fire", vi: "Lửa", emoji: "🔥" },
+    { word: "Earth", vi: "Trái đất", emoji: "🌍" },
+    { word: "Grass", vi: "Bãi cỏ", emoji: "🌿" },
+    { word: "Leaf", vi: "Chiếc lá", emoji: "🍂" },
+    { word: "Mountain", vi: "Ngọn núi", emoji: "⛰️" },
+    { word: "River", vi: "Dòng sông", emoji: "🏞️" },
+    { word: "Ocean", vi: "Đại dương", emoji: "🌊" },
+    { word: "Beach", vi: "Bãi biển", emoji: "🏖️" },
+    { word: "Sand", vi: "Cát", emoji: "🏜️" },
+    { word: "Rock", vi: "Hòn đá", emoji: "🪨" },
+    { word: "Cloud", vi: "Đám mây", emoji: "☁️" },
+    { word: "Sky", vi: "Bầu trời", emoji: "🌌" },
+  ],
+  school: [
+    { word: "Book", vi: "Quyển sách", emoji: "📖" },
+    { word: "Pencil", vi: "Bút chì", emoji: "✏️" },
+    { word: "Pen", vi: "Cái bút", emoji: "🖊️" },
+    { word: "Eraser", vi: "Cục tẩy", emoji: "🧽" },
+    { word: "Ruler", vi: "Cái thước", emoji: "📏" },
+    { word: "School", vi: "Trường học", emoji: "🏫" },
+    { word: "Teacher", vi: "Giáo viên", emoji: "👩‍🏫" },
+    { word: "Student", vi: "Học sinh", emoji: "👨‍🎓" },
+    { word: "Desk", vi: "Bàn học", emoji: "🪑" },
+    { word: "Bag", vi: "Cặp sách", emoji: "🎒" },
+  ],
+  home: [
+    { word: "House", vi: "Ngôi nhà", emoji: "🏠" },
+    { word: "Door", vi: "Cửa ra vào", emoji: "🚪" },
+    { word: "Window", vi: "Cửa sổ", emoji: "🪟" },
+    { word: "Bed", vi: "Cái giường", emoji: "🛏️" },
+    { word: "Chair", vi: "Cái ghế", emoji: "🪑" },
+    { word: "Table", vi: "Cái bàn", emoji: "🪵" },
+    { word: "Clock", vi: "Đồng hồ", emoji: "⏰" },
+    { word: "Television", vi: "Tivi", emoji: "📺" },
+    { word: "Sofa", vi: "Ghế sô pha", emoji: "🛋️" },
+    { word: "Kitchen", vi: "Nhà bếp", emoji: "🍳" },
+  ],
+  clothes: [
+    { word: "Hat", vi: "Cái mũ", emoji: "🧢" },
+    { word: "Shoes", vi: "Đôi giày", emoji: "👟" },
+    { word: "Shirt", vi: "Áo sơ mi", emoji: "👕" },
+    { word: "Pants", vi: "Quần dài", emoji: "👖" },
+    { word: "Dress", vi: "Váy", emoji: "👗" },
+    { word: "Skirt", vi: "Chân váy", emoji: "🥻" },
+    { word: "Socks", vi: "Tất", emoji: "🧦" },
+    { word: "Jacket", vi: "Áo khoác", emoji: "🧥" },
+    { word: "Glasses", vi: "Kính", emoji: "👓" },
+    { word: "Watch", vi: "Đồng hồ đeo tay", emoji: "⌚" },
+  ],
+  transport: [
+    { word: "Car", vi: "Ô tô", emoji: "🚗" },
+    { word: "Train", vi: "Tàu hỏa", emoji: "🚂" },
+    { word: "Plane", vi: "Máy bay", emoji: "✈️" },
+    { word: "Boat", vi: "Con thuyền", emoji: "⛵" },
+    { word: "Bus", vi: "Xe buýt", emoji: "🚌" },
+    { word: "Bike", vi: "Xe đạp", emoji: "🚲" },
+    { word: "Motorcycle", vi: "Xe máy", emoji: "🏍️" },
+    { word: "Helicopter", vi: "Trực thăng", emoji: "🚁" },
+    { word: "Ship", vi: "Tàu thủy", emoji: "🚢" },
+    { word: "Truck", vi: "Xe tải", emoji: "🚛" },
+  ],
+  body: [
+    { word: "Eye", vi: "Con mắt", emoji: "👁️" },
+    { word: "Ear", vi: "Cái tai", emoji: "👂" },
+    { word: "Nose", vi: "Cái mũi", emoji: "👃" },
+    { word: "Mouth", vi: "Cái miệng", emoji: "👄" },
+    { word: "Hand", vi: "Bàn tay", emoji: "✋" },
+    { word: "Foot", vi: "Bàn chân", emoji: "🦶" },
+    { word: "Hair", vi: "Mái tóc", emoji: "💇" },
+    { word: "Face", vi: "Khuôn mặt", emoji: "😊" },
+    { word: "Arm", vi: "Cánh tay", emoji: "💪" },
+    { word: "Leg", vi: "Cái chân", emoji: "🦵" },
+  ],
+  toys: [
+    { word: "Ball", vi: "Quả bóng", emoji: "⚽" },
+    { word: "Doll", vi: "Búp bê", emoji: "🪆" },
+    { word: "Kite", vi: "Cái diều", emoji: "🪁" },
+    { word: "Robot", vi: "Người máy", emoji: "🤖" },
+    { word: "Block", vi: "Khối xếp hình", emoji: "🧱" },
+    { word: "Puzzle", vi: "Trò xếp hình", emoji: "🧩" },
+    { word: "Game", vi: "Trò chơi", emoji: "🎮" },
+    { word: "Teddy bear", vi: "Gấu bông", emoji: "🧸" },
+    { word: "Toy car", vi: "Xe đồ chơi", emoji: "🏎️" },
+    { word: "Balloon", vi: "Quả bóng bay", emoji: "🎈" },
+  ],
+};
+
+const ALL_WORDS = Object.values(KIDS_CATEGORIES)
+  .flat()
+  .map((i) => ({ word: i.word, meaning_vi: i.vi, emoji: i.emoji }));
 
 class PRNG {
   private seed: number;
@@ -152,56 +184,150 @@ export function generateKidsData(
   volume: number,
   topic: string,
 ) {
-  // Create a unique deterministic seed for this exact unit
   const seedStr = `${book}_${volume}_${level}_${topic}`;
   const prng = new PRNG(seedStr);
 
-  // Helper to get N random words
-  const getRandomWords = (count: number) => {
-    const shuffled = [...KIDS_DICTIONARY].sort(() => prng.next() - 0.5);
+  const determineCategory = (topicStr: string) => {
+    const t = topicStr.toLowerCase();
+    if (
+      t.includes("animal") ||
+      t.includes("pet") ||
+      t.includes("zoo") ||
+      t.includes("farm")
+    )
+      return "animals";
+    if (
+      t.includes("food") ||
+      t.includes("drink") ||
+      t.includes("menu") ||
+      t.includes("meal") ||
+      t.includes("hungry") ||
+      t.includes("lunch") ||
+      t.includes("dinner")
+    )
+      return "food";
+    if (t.includes("color")) return "colors";
+    if (
+      t.includes("school") ||
+      t.includes("class") ||
+      t.includes("study") ||
+      t.includes("subject") ||
+      t.includes("teacher")
+    )
+      return "school";
+    if (
+      t.includes("home") ||
+      t.includes("house") ||
+      t.includes("room") ||
+      t.includes("living") ||
+      t.includes("bedroom")
+    )
+      return "home";
+    if (
+      t.includes("clothes") ||
+      t.includes("wear") ||
+      t.includes("dress") ||
+      t.includes("shirt")
+    )
+      return "clothes";
+    if (
+      t.includes("transport") ||
+      t.includes("vehicle") ||
+      t.includes("car") ||
+      t.includes("drive")
+    )
+      return "transport";
+    if (
+      t.includes("body") ||
+      t.includes("face") ||
+      t.includes("head") ||
+      t.includes("hair") ||
+      t.includes("appearance")
+    )
+      return "body";
+    if (
+      t.includes("toy") ||
+      t.includes("play") ||
+      t.includes("game") ||
+      t.includes("hobby") ||
+      t.includes("hobbies") ||
+      t.includes("free time")
+    )
+      return "toys";
+    if (
+      t.includes("nature") ||
+      t.includes("weather") ||
+      t.includes("season") ||
+      t.includes("summer") ||
+      t.includes("holiday") ||
+      t.includes("park") ||
+      t.includes("camp") ||
+      t.includes("outside")
+    )
+      return "nature";
+    return null;
+  };
+
+  const getWords = (count: number) => {
+    let pool = ALL_WORDS;
+    const matchedCategory = determineCategory(topic);
+    if (matchedCategory) {
+      pool = KIDS_CATEGORIES[matchedCategory].map((i) => ({
+        word: i.word,
+        meaning_vi: i.vi,
+        emoji: i.emoji,
+      }));
+      if (pool.length < count) {
+        const remaining = ALL_WORDS.filter(
+          (w) => !pool.find((p) => p.word === w.word),
+        );
+        pool = [
+          ...pool,
+          ...remaining
+            .sort(() => prng.next() - 0.5)
+            .slice(0, count - pool.length),
+        ];
+      }
+    }
+    const shuffled = [...pool].sort(() => prng.next() - 0.5);
     return shuffled.slice(0, count);
   };
 
   const wordCount =
     level.includes("3") || volume >= 3
-      ? 10
+      ? 12
       : level.includes("2") || volume === 2
-        ? 8
-        : 6;
-  const selectedWords = getRandomWords(wordCount);
+        ? 10
+        : 8;
+  const selectedWords = getWords(wordCount);
 
   if (type === "kids_vocabulary" || type === "matrix" || type === "match") {
-    return {
-      flashcards: selectedWords,
-    };
+    return { flashcards: selectedWords };
   }
 
   if (type === "kids_listening") {
     const targetWord =
       selectedWords[Math.floor(prng.next() * selectedWords.length)];
-    const options = [
-      targetWord.word,
-      selectedWords[Math.floor(prng.next() * selectedWords.length)].word,
-      selectedWords[Math.floor(prng.next() * selectedWords.length)].word,
-    ];
-    // Ensure options are unique
-    const uniqueOptions = Array.from(new Set(options));
-    while (uniqueOptions.length < 3) {
-      const extra =
-        KIDS_DICTIONARY[Math.floor(prng.next() * KIDS_DICTIONARY.length)].word;
-      if (!uniqueOptions.includes(extra)) uniqueOptions.push(extra);
+    const options = [targetWord.word];
+    while (options.length < 3) {
+      const extra = ALL_WORDS[Math.floor(prng.next() * ALL_WORDS.length)].word;
+      if (!options.includes(extra)) options.push(extra);
     }
 
     return {
       title: "Listen and Choose",
       transcript: [
-        { speaker: "Audio", text: `I have a ${targetWord.word}.`, id: "t1" },
+        {
+          speaker: "Audio",
+          text: `I have a ${targetWord.word.toLowerCase()}.`,
+          id: "t1",
+        },
       ],
       questions: [
         {
           type: "multiple_choice",
           question: `What do I have? (Chủ đề: ${topic})`,
-          options: uniqueOptions.sort(() => prng.next() - 0.5),
+          options: options.sort(() => prng.next() - 0.5),
           answers: [targetWord.word],
         },
       ],
@@ -214,8 +340,8 @@ export function generateKidsData(
     return {
       title: "Let's Talk!",
       bulletPoints: [
-        `Say: Look at the ${word1.word} ${word1.emoji}`,
-        `Say: I like the ${word2.word} ${word2.emoji}`,
+        `Say: Look at the ${word1.word.toLowerCase()} ${word1.emoji}`,
+        `Say: I like the ${word2.word.toLowerCase()} ${word2.emoji}`,
       ],
       tip: "Nói thật to và rõ ràng nhé!",
     };
@@ -224,14 +350,12 @@ export function generateKidsData(
   if (type === "kids_phonics") {
     const word = selectedWords[0].word;
     const firstLetter = word.charAt(0).toUpperCase();
+    const secondWord =
+      ALL_WORDS.find((w) => w.word !== word && w.word.startsWith(firstLetter))
+        ?.word || "Apple";
     return {
       title: "Phonics Fun!",
-      bulletPoints: [
-        word,
-        KIDS_DICTIONARY.find(
-          (w) => w.word !== word && w.word.startsWith(firstLetter),
-        )?.word || "Apple",
-      ],
+      bulletPoints: [word, secondWord],
       tip: `Âm /${firstLetter}/ trong tiếng Anh nhé!`,
     };
   }
@@ -242,11 +366,11 @@ export function generateKidsData(
     return {
       title: `The ${w1.word}`,
       paragraphs: [
-        `This is a ${w1.word} ${w1.emoji}. The ${w1.word} is very happy. It likes to play with the ${w2.word} ${w2.emoji}.`,
+        `This is a ${w1.word.toLowerCase()} ${w1.emoji}. The ${w1.word.toLowerCase()} is very happy. It likes to play with the ${w2.word.toLowerCase()} ${w2.emoji}.`,
       ],
       questions: [
         {
-          question: `What does the ${w1.word} like to play with?`,
+          question: `What does the ${w1.word.toLowerCase()} like to play with?`,
           options: [w2.word, selectedWords[2].word, selectedWords[3].word].sort(
             () => prng.next() - 0.5,
           ),
@@ -260,8 +384,8 @@ export function generateKidsData(
     const w = selectedWords[0];
     return {
       title: "Make a Sentence",
-      question: `Sắp xếp các từ sau thành câu đúng: is / a / This / ${w.word}`,
-      answer: `This is a ${w.word}`,
+      question: `Sắp xếp các từ sau thành câu đúng: is / a / This / ${w.word.toLowerCase()}`,
+      answer: `This is a ${w.word.toLowerCase()}`,
       tip: "Nhớ viết hoa chữ cái đầu tiên nhé.",
     };
   }

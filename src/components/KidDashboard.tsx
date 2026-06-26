@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Gamepad2,
   Loader2,
@@ -99,6 +99,23 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [stars, setStars] = useState(0);
   const [points, setPoints] = useState(0);
+  const [winOverlay, setWinOverlay] = useState<{
+    stars: number;
+    points: number;
+    message: string;
+  } | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (gameMode && gameAreaRef.current) {
+      setTimeout(() => {
+        gameAreaRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    }
+  }, [gameMode]);
 
   const ALL_GAMES =
     selectedBook === "starters" && selectedVolume === 2
@@ -202,6 +219,25 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
         };
       });
     }
+
+    const messages = [
+      "Tuyệt vời!",
+      "Xuất sắc!",
+      "Bé giỏi quá!",
+      "Làm tốt lắm!",
+      "Đỉnh quá đi!",
+    ];
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+    setWinOverlay({
+      stars: earnedStars,
+      points: earnedPoints,
+      message: randomMessage,
+    });
+  };
+
+  const closeWinOverlay = () => {
+    setWinOverlay(null);
     setGameMode(null);
     setFlashcards([]);
     setSkillData(null);
@@ -1566,7 +1602,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
       )}
 
       {/* Game Views */}
-      <div className="space-y-8">
+      <div className="space-y-8" ref={gameAreaRef}>
         {gameMode === "matrix" && flashcards.length > 0 && (
           <div className="animate-in fade-in slide-in-from-bottom-8">
             <div className="flex items-center justify-between mb-6">
@@ -1686,6 +1722,34 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
             </div>
           )}
       </div>
+
+      {winOverlay && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border-8 border-yellow-300 text-center animate-in zoom-in spin-in-3">
+            <div className="text-6xl mb-4 animate-bounce">🏆</div>
+            <h2 className="text-4xl font-black text-amber-500 mb-2 drop-shadow-sm">
+              {winOverlay.message}
+            </h2>
+            <div className="flex justify-center items-center gap-4 my-6">
+              <div className="bg-yellow-100 px-6 py-4 rounded-2xl flex items-center gap-2 border-2 border-yellow-200">
+                <Star className="w-8 h-8 text-yellow-500 fill-yellow-500 animate-pulse" />
+                <span className="text-2xl font-black text-yellow-700">
+                  +{winOverlay.stars}
+                </span>
+              </div>
+            </div>
+            <p className="text-lg font-bold text-slate-500 mb-8">
+              Bé được cộng thêm {winOverlay.points} điểm!
+            </p>
+            <button
+              onClick={closeWinOverlay}
+              className="w-full py-4 bg-emerald-400 hover:bg-emerald-500 text-white text-xl font-black rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 border-b-4 border-emerald-600 active:translate-y-0 active:border-b-0"
+            >
+              Tiếp Tục Chơi!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
