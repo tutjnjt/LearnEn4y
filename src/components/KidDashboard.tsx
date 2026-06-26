@@ -23,6 +23,7 @@ import { KidJourneyMap } from "./KidJourneyMap";
 import BalloonMatch from "./games/BalloonMatch";
 import SoundMemory from "./games/SoundMemory";
 import MagicColoring from "./games/MagicColoring";
+import { generateKidsData } from "../utils/kidsDataGenerator";
 
 export function KidDashboard({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState<string | null>(null);
@@ -155,46 +156,20 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
       const topic =
         (currentLevelObj as any)?.topic || currentLevelObj?.name || "";
 
-      const cacheKey = `kids_game_v5_${selectedBook}_${selectedVolume}_${level}_${type}_${mode}`;
+      const cacheKey = `kids_game_v6_${selectedBook}_${selectedVolume}_${level}_${type}_${mode}`;
       const cachedData = localStorage.getItem(cacheKey);
 
       let data;
       if (cachedData) {
         data = JSON.parse(cachedData);
       } else {
-        const res = await fetch("/api/kids/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type,
-            level,
-            book: bookName,
-            volume: selectedVolume,
-            topic,
-          }),
-        });
-        if (!res.ok) {
-          let errorMessage = "Lỗi kết nối đến máy chủ";
-          try {
-            const errorData = await res.json();
-            errorMessage = errorData.error || errorMessage;
-          } catch (e) {
-            errorMessage = `Lỗi máy chủ (${res.status}). Vui lòng thử lại sau.`;
-          }
-          throw new Error(errorMessage);
-        }
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Dữ liệu trả về không hợp lệ. Vui lòng thử lại.");
-        }
+        // Use offline generator directly instead of API for kids dashboard
+        // to prevent lag, timeouts, or errors.
+        data = generateKidsData(type, level, bookName, selectedVolume, topic);
         try {
           localStorage.setItem(cacheKey, JSON.stringify(data));
         } catch (storageError) {
-          console.warn(
-            "Could not save to localStorage. Cache might be full.",
-            storageError,
-          );
+          console.warn("Could not save to localStorage.", storageError);
         }
       }
 

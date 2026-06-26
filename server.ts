@@ -29,7 +29,7 @@ async function startServer() {
     for (let i = 0; i < retries; i++) {
       try {
         const response = await aiClient.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-2.0-flash",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
@@ -42,14 +42,14 @@ async function startServer() {
       } catch (error: any) {
         console.error("Gemini generation error:", error);
         if (i === retries - 1) {
-          if (error.message?.includes("429") || error.message?.includes("quota")) {
-            throw new Error("Hệ thống AI đang quá tải do nhiều người dùng (Hết hạn mức). Bạn hãy chờ khoảng 1 phút rồi thử lại nhé!");
-          }
-          throw new Error("Lỗi khi tạo dữ liệu từ AI. Vui lòng thử lại!");
+          console.warn("Retries exhausted, using fallback data");
+          return getFallbackData(type, level);
         }
         let waitTime = Math.pow(2, i) * 1000;
         if (error.message?.includes("429") || error.status === 429 || error.message?.includes("quota")) {
-          throw new Error("Hệ thống AI đang quá tải do nhiều người dùng (Hết hạn mức). Bạn hãy chờ khoảng 1 phút rồi thử lại nhé!");
+          // If rate limited, just fail immediately and use fallback instead of waiting long
+          console.warn("Rate limited, using fallback data immediately");
+          return getFallbackData(type, level);
         }
         await new Promise((resolve) => setTimeout(resolve, waitTime));
       }
