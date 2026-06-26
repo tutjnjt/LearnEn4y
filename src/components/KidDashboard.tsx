@@ -82,11 +82,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
     }
   };
 
-  const [levelStars, setLevelStars] = useState<Record<string, number>>({
-    "Level 1": 0,
-    "Level 2": 0,
-    "Level 3": 0,
-  });
+  const [completedLevels, setCompletedLevels] = useState<Record<string, boolean>>({});
   const [gameStars, setGameStars] = useState<
     Record<string, Record<string, number>>
   >({});
@@ -134,9 +130,9 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   );
 
   const handleNextLevel = () => {
-    setLevelStars((prev) => ({
+    setCompletedLevels((prev) => ({
       ...prev,
-      [level]: 3,
+      [level]: true,
     }));
     const currentIndex = levels.findIndex((l) => l.id === level);
     if (currentIndex < levels.length - 1) {
@@ -1007,12 +1003,21 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
     }
   }
 
-  // Calculate unlocked level index (unlock next level if current has at least 1 star)
+  // Calculate unlocked level index (unlock next level if current is not completed)
   const currentLevelIndex = levels.findIndex(
-    (l) => (levelStars[l.id] || 0) === 0,
+    (l) => !completedLevels[l.id]
   );
   const activeLevelIndex =
     currentLevelIndex === -1 ? levels.length - 1 : currentLevelIndex;
+
+  // Compute actual stars per level (out of 5 max)
+  const computedLevelStars: Record<string, number> = {};
+  levels.forEach(l => {
+    const starsObj = gameStars[l.id] || {};
+    const totalEarned = Object.values(starsObj).reduce((sum, s) => sum + s, 0);
+    const maxPossible = ALL_GAMES.length * 5;
+    computedLevelStars[l.id] = maxPossible > 0 ? Math.round((totalEarned / maxPossible) * 5) : 0;
+  });
 
   return (
     <div className="max-w-5xl mx-auto w-full p-4 sm:p-6 animate-in fade-in zoom-in duration-500 overflow-x-hidden">
@@ -1256,7 +1261,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           <KidJourneyMap
             levels={levels}
             currentLevelIndex={activeLevelIndex}
-            levelStars={levelStars}
+            levelStars={computedLevelStars}
             avatar={avatar}
             onSelectLevel={(id) => {
               setLevel(id);

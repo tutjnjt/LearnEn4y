@@ -88,10 +88,10 @@ export function KidJourneyMap({
                 )}
 
                 <div className="flex gap-1 mb-2 bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm shadow-sm">
-                  {[1, 2, 3].map((s) => (
+                  {[1, 2, 3, 4, 5].map((s) => (
                     <Star
                       key={s}
-                      className={`w-4 h-4 ${s <= starsEarned ? "fill-yellow-400 text-yellow-400" : "fill-slate-200 text-slate-300"}`}
+                      className={`w-4 h-4 ${s <= Math.min(5, starsEarned) ? "fill-yellow-400 text-yellow-400" : "fill-slate-200 text-slate-300"}`}
                     />
                   ))}
                 </div>
