@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Volume2,
   Mic,
@@ -30,6 +30,15 @@ export function KidSkillGame({
   const [recordedText, setRecordedText] = useState("");
   const [feedback, setFeedback] = useState("");
   const [recognitionInstance, setRecognitionInstance] = useState<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionInstance) {
+        recognitionInstance.stop();
+      }
+      window.speechSynthesis.cancel();
+    };
+  }, [recognitionInstance]);
 
   const toggleRecording = (targetText: string) => {
     if (isRecording) {
@@ -119,6 +128,7 @@ export function KidSkillGame({
   };
 
   const speakText = (text: string) => {
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
     window.speechSynthesis.speak(utterance);

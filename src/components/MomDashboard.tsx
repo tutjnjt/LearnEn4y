@@ -440,6 +440,15 @@ function MomPractice({
 
   const recognitionRef = useRef<any>(null);
 
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
   const fetchContent = async (
     type: "vocabulary" | "speaking" | "writing" | "listening" | "reading",
   ) => {
