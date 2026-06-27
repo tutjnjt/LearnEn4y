@@ -105,6 +105,31 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const handlePopState = () => {
+      setGameMode((prev) => {
+        if (prev !== null) {
+          return null;
+        }
+        return prev;
+      });
+      setWinOverlay(null);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (gameMode) {
+      window.history.pushState({ isGameMode: true }, "");
+    } else {
+      if (window.history.state && window.history.state.isGameMode) {
+        window.history.back();
+      }
+    }
+  }, [gameMode]);
+
+  useEffect(() => {
     if (gameMode && gameAreaRef.current) {
       setTimeout(() => {
         gameAreaRef.current?.scrollIntoView({

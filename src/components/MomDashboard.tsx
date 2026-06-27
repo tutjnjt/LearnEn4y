@@ -498,12 +498,20 @@ function MomPractice({
   };
 
   const speakText = (text: string) => {
-    if ("speechSynthesis" in window) {
+    try {
+      if (!("speechSynthesis" in window)) return;
       window.speechSynthesis.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
       utterance.rate = listeningSpeed;
+      const voices = window.speechSynthesis.getVoices();
+      const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+      if (enVoice) utterance.voice = enVoice;
+      
       window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.error("Speech synthesis failed:", e);
     }
   };
 
@@ -1514,11 +1522,20 @@ function Flashcards({
   };
 
   const speakText = (text: string) => {
-    if ("speechSynthesis" in window) {
+    try {
+      if (!("speechSynthesis" in window)) return;
       window.speechSynthesis.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
+      const voices = window.speechSynthesis.getVoices();
+      const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+      if (enVoice) utterance.voice = enVoice;
+      utterance.rate = 0.9;
+      
       window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.error("Speech synthesis failed:", e);
     }
   };
 

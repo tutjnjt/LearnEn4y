@@ -51,9 +51,21 @@ export default function SoundMemory({ cards, onWin }: SoundMemoryProps) {
   }, [cards]);
 
   const speak = (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    window.speechSynthesis.speak(utterance);
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      const voices = window.speechSynthesis.getVoices();
+      const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+      if (enVoice) utterance.voice = enVoice;
+      utterance.rate = 0.9;
+      
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.error("Speech synthesis failed:", e);
+    }
   };
 
   const handleCardClick = (card: Card) => {
