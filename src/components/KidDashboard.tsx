@@ -127,28 +127,29 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   }, [view, gameMode, winOverlay, showReportForLevel]);
 
   useEffect(() => {
-    window.history.pushState({ isAppletLayer: true }, "");
+    // Push an initial state when entering KidDashboard
+    window.history.pushState({ isAppletLayer: true, depth: 0 }, "");
 
-    const handlePopState = () => {
+    const handlePopState = (e: PopStateEvent) => {
       const s = stateRef.current;
       if (s.winOverlay) {
         setWinOverlay(null);
-        window.history.pushState({ isAppletLayer: true }, "");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else if (s.showReportForLevel) {
         setShowReportForLevel(null);
-        window.history.pushState({ isAppletLayer: true }, "");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else if (s.gameMode) {
         setGameMode(null);
-        window.history.pushState({ isAppletLayer: true }, "");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else if (s.view === "menu") {
         setView("map");
-        window.history.pushState({ isAppletLayer: true }, "");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else if (s.view === "map") {
         setView("volumes");
-        window.history.pushState({ isAppletLayer: true }, "");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else if (s.view === "volumes") {
         setView("books");
-        window.history.pushState({ isAppletLayer: true }, "");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else {
         onBack();
       }

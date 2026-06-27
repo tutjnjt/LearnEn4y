@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Volume2 } from "lucide-react";
+import { speak as playAudio } from "../../utils/audio";
 
 interface Flashcard {
   word: string;
@@ -51,24 +52,7 @@ export default function SoundMemory({ cards, onWin }: SoundMemoryProps) {
   }, [cards]);
 
   const speak = (text: string) => {
-    try {
-      if (!("speechSynthesis" in window)) return;
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      
-      // On some Android devices, getVoices() might be empty initially, so we just use the default voice if none found.
-      const voices = window.speechSynthesis.getVoices();
-      if (voices && voices.length > 0) {
-        const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
-        if (enVoice) utterance.voice = enVoice;
-      }
-      
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.error("Speech synthesis failed:", e);
-    }
+    playAudio(text);
   };
 
   const handleCardClick = (card: Card) => {

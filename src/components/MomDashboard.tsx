@@ -40,6 +40,7 @@ import {
   SavedWord,
   UserStats,
 } from "../types";
+import { speak } from "../utils/audio";
 import {
   BarChart,
   Bar,
@@ -72,11 +73,11 @@ export function MomDashboard({ onBack }: { onBack: () => void }) {
   }, [showTest]);
 
   useEffect(() => {
-    window.history.pushState({ isAppletLayer: true }, "");
-    const handlePopState = () => {
+    window.history.pushState({ isAppletLayer: true, depth: 0 }, "");
+    const handlePopState = (e: PopStateEvent) => {
       if (stateRef.current.showTest) {
         setShowTest(false);
-        window.history.pushState({ isAppletLayer: true }, "");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else {
         onBack();
       }
@@ -523,22 +524,7 @@ function MomPractice({
   };
 
   const speakText = (text: string) => {
-    try {
-      if (!("speechSynthesis" in window)) return;
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      utterance.rate = listeningSpeed;
-      const voices = window.speechSynthesis.getVoices();
-      if (voices && voices.length > 0) {
-        const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
-        if (enVoice) utterance.voice = enVoice;
-      }
-      
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.error("Speech synthesis failed:", e);
-    }
+    speak(text, listeningSpeed);
   };
 
   const stopSpeaking = () => {
@@ -1546,22 +1532,7 @@ function Flashcards({
   };
 
   const speakText = (text: string) => {
-    try {
-      if (!("speechSynthesis" in window)) return;
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      const voices = window.speechSynthesis.getVoices();
-      if (voices && voices.length > 0) {
-        const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
-        if (enVoice) utterance.voice = enVoice;
-      }
-      utterance.rate = 0.9;
-      
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.error("Speech synthesis failed:", e);
-    }
+    speak(text);
   };
 
   if (words.length === 0) {

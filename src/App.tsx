@@ -8,6 +8,7 @@ import { KidDashboard } from "./components/KidDashboard";
 import { Profile } from "./types";
 import { Play, Sparkles, Star } from "lucide-react";
 import { motion } from "motion/react";
+import { initAudio } from "./utils/audio";
 
 export default function App() {
   const [profile, setProfile] = useState<Profile>(null);
@@ -61,9 +62,7 @@ export default function App() {
           whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {
-            if ("speechSynthesis" in window) {
-              window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
-            }
+            initAudio();
             setProfile("kid");
           }}
           className="w-full flex items-center justify-center gap-4 p-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full shadow-lg shadow-emerald-500/30 text-white group"
