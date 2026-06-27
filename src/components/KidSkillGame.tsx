@@ -31,6 +31,7 @@ export function KidSkillGame({
   const [recordedText, setRecordedText] = useState("");
   const [feedback, setFeedback] = useState("");
   const [recognitionInstance, setRecognitionInstance] = useState<any>(null);
+  const [missedWords, setMissedWords] = useState<string[]>([]);
 
   useEffect(() => {
     return () => {
@@ -107,20 +108,24 @@ export function KidSkillGame({
     if (targetWords.length === 0) return;
 
     let matchCount = 0;
+    const missed: string[] = [];
     targetWords.forEach((w) => {
       if (spokenWords.includes(w)) matchCount++;
+      else missed.push(w);
     });
+    setMissedWords(missed);
 
     const matchRate = matchCount / targetWords.length;
-    // Require at least 70% of the words to be spoken, and match rate to be high
-    const isLengthSufficient = spokenWords.length >= targetWords.length * 0.7;
+    const matchPercentage = Math.round(matchRate * 100);
+    // Require at least 60% of the words to be spoken
+    const isLengthSufficient = spokenWords.length >= targetWords.length * 0.6;
 
-    if (matchRate >= 0.7 && isLengthSufficient) {
-      setFeedback("Tuyệt vời! Bé đọc rất chuẩn. 🌟");
+    if (matchRate >= 0.6 && isLengthSufficient) {
+      setFeedback(`Tuyệt vời! Bé đọc rất chuẩn (Khớp: ${matchPercentage}%). 🌟`);
       setIsCorrect(true);
     } else {
       setFeedback(
-        `Gần đúng rồi! Bé thử nghe và đọc lại nhé. (Bé đọc: "${spoken}")`,
+        `Độ chính xác: ${matchPercentage}%. Bé đọc: "${spoken}". Hãy nghe lại và thử lại nhé!`,
       );
       setIsCorrect(false);
       setMisses((m) => m + 1);
@@ -195,15 +200,52 @@ export function KidSkillGame({
     );
   }
 
+  const moveToNextStep = () => {
+    setFeedback("");
+    setIsCorrect(null);
+    setSelected(null);
+    setRecordedText("");
+    setWritingInput("");
+    setMissedWords([]);
+    
+    let totalSteps = 1;
+    if (type === "kids_listening" || type === "kids_reading") totalSteps = data.questions?.length || 1;
+    else if (type === "kids_speaking" || type === "kids_phonics") totalSteps = data.bulletPoints?.length || 1;
+    else if (type === "kids_writing") totalSteps = data.items?.length || 1;
+
+    if (step < totalSteps - 1) {
+      setStep((s) => s + 1);
+    } else {
+      handleWin();
+    }
+  };
+
+  const checkAnswerWithStep = (ans: string, correctAns: string[]) => {
+    setSelected(ans);
+    if (correctAns.includes(ans)) {
+      setIsCorrect(true);
+      setTimeout(() => {
+        moveToNextStep();
+      }, 1000);
+    } else {
+      setIsCorrect(false);
+      setMisses((m) => m + 1);
+      setTimeout(() => {
+        setIsCorrect(null);
+        setSelected(null);
+      }, 1000);
+    }
+  };
+
   if (type === "kids_listening") {
-    const q = data.questions?.[0];
+    const q = data.questions?.[step];
     return (
       <div className="bg-white p-8 rounded-3xl border-4 border-indigo-200 shadow-sm max-w-2xl mx-auto text-center animate-in zoom-in">
         <h3 className="text-2xl font-black text-indigo-600 mb-6">
           {data.title}
         </h3>
         <button
-          onClick={() => speakText(data.transcript[0]?.text || "")}
+          onClick={() => speakText(data.transcript[step]?.text || "")}
           className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-8 hover:bg-indigo-200 hover:scale-110 transition-all text-indigo-500 shadow-sm border-4 border-indigo-300"
         >
           <Volume2 className="w-12 h-12" />
@@ -217,7 +259,7 @@ export function KidSkillGame({
               {q.options?.map((opt: string, i: number) => (
                 <button
                   key={i}
-                  onClick={() => checkAnswer(opt, q.answers)}
+                  onClick={() => checkAnswerWithStep(opt, q.answers)}
                   className={`w-full p-4 rounded-2xl font-bold text-lg transition-all border-4 ${
                     selected === opt
                       ? isCorrect
@@ -253,7 +295,15 @@ export function KidSkillGame({
           className={`${isPhonics ? "bg-pink-50 border-pink-100" : "bg-emerald-50 border-emerald-100"} border-2 p-6 rounded-2xl mb-6`}
         >
           <p className="text-2xl font-bold text-slate-800 leading-relaxed">
-            {targetText}
+            {targetText.split(/\s+/).map((word: string, index: number) => {
+              const cleanWord = word.toLowerCase().replace(/[.,!?]/g, "");
+              const isMissed = isCorrect === false && missedWords.includes(cleanWord);
+              return (
+                <span key={index} className={isMissed ? "text-red-500 underline" : ""}>
+                  {word}{" "}
+                </span>
+              );
+            })}
           </p>
         </div>
         <div className="flex justify-center gap-4 mb-6">
@@ -302,16 +352,7 @@ export function KidSkillGame({
           Mẹo: {data.tip}
         </p>
         <button
-          onClick={() => {
-            setFeedback("");
-            setIsCorrect(null);
-            setRecordedText("");
-            if (step < (data.bulletPoints?.length || 0) - 1) {
-              setStep((s) => s + 1);
-            } else {
-              handleWin();
-            }
-          }}
+          onClick={moveToNextStep}
           disabled={isCorrect !== true}
           className={`w-full py-4 ${isPhonics ? "bg-pink-500 hover:bg-pink-600" : "bg-emerald-500 hover:bg-emerald-600"} text-white font-black text-xl rounded-2xl shadow-sm transition-colors flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
         >
@@ -325,21 +366,16 @@ export function KidSkillGame({
   }
 
   if (type === "kids_reading") {
-    const q = data.questions?.[0];
+    const q = data.questions?.[step];
     return (
       <div className="bg-white p-8 rounded-3xl border-4 border-amber-200 shadow-sm max-w-3xl mx-auto animate-in zoom-in">
         <h3 className="text-2xl font-black text-amber-600 mb-6 text-center">
           {data.title}
         </h3>
         <div className="bg-amber-50 border-2 border-amber-100 p-6 rounded-2xl mb-8">
-          {data.paragraphs?.map((p: string, i: number) => (
-            <p
-              key={i}
-              className="text-xl font-bold text-slate-800 leading-relaxed mb-4"
-            >
-              {p}
-            </p>
-          ))}
+          <p className="text-xl font-bold text-slate-800 leading-relaxed mb-4">
+            {data.paragraphs?.[step] || data.paragraphs?.[0]}
+          </p>
         </div>
         {q && (
           <div>
@@ -350,7 +386,7 @@ export function KidSkillGame({
               {q.options?.map((opt: string, i: number) => (
                 <button
                   key={i}
-                  onClick={() => checkAnswer(opt, q.answers)}
+                  onClick={() => checkAnswerWithStep(opt, q.answers)}
                   className={`p-4 rounded-2xl font-bold text-lg transition-all border-4 ${
                     selected === opt
                       ? isCorrect
@@ -370,12 +406,13 @@ export function KidSkillGame({
   }
 
   if (type === "kids_writing") {
+    const currentItem = data.items?.[step];
     return (
       <div className="bg-white p-8 rounded-3xl border-4 border-rose-200 shadow-sm max-w-2xl mx-auto text-center animate-in zoom-in">
         <h3 className="text-2xl font-black text-rose-600 mb-6">{data.title}</h3>
         <div className="bg-rose-50 border-2 border-rose-100 p-6 rounded-2xl mb-8">
           <p className="text-xl font-bold text-slate-800 leading-relaxed">
-            {data.question}
+            {currentItem?.question}
           </p>
         </div>
         <div className="relative max-w-md mx-auto mb-6">
@@ -404,12 +441,12 @@ export function KidSkillGame({
         <p className="text-rose-600 font-medium mb-8">Mẹo: {data.tip}</p>
         <button
           onClick={() => {
-            if (!data.answer) {
-              handleWin();
+            if (!currentItem?.answer) {
+              moveToNextStep();
               return;
             }
             // normalized comparison
-            const correctStr = data.answer
+            const correctStr = currentItem.answer
               .toLowerCase()
               .replace(/[^a-z0-9\s]/g, "")
               .trim();
@@ -421,7 +458,7 @@ export function KidSkillGame({
             if (correctStr === inputStr) {
               setIsCorrect(true);
               setTimeout(() => {
-                handleWin();
+                moveToNextStep();
               }, 1000);
             } else {
               setIsCorrect(false);

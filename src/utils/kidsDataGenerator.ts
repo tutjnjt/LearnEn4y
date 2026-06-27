@@ -306,86 +306,96 @@ export function generateKidsData(
   }
 
   if (type === "kids_listening") {
-    const targetWord =
-      selectedWords[Math.floor(prng.next() * selectedWords.length)];
-    const options = [targetWord.word];
-    while (options.length < 3) {
-      const extra = ALL_WORDS[Math.floor(prng.next() * ALL_WORDS.length)].word;
-      if (!options.includes(extra)) options.push(extra);
+    const questions = [];
+    const transcripts = [];
+    for (let i = 0; i < 3; i++) {
+      const targetWord = selectedWords[i % selectedWords.length];
+      const options = [targetWord.word];
+      while (options.length < 3) {
+        const extra = ALL_WORDS[Math.floor(prng.next() * ALL_WORDS.length)].word;
+        if (!options.includes(extra)) options.push(extra);
+      }
+      transcripts.push({
+        speaker: "Audio",
+        text: `I have a ${targetWord.word.toLowerCase()}.`,
+        id: `t${i}`,
+      });
+      questions.push({
+        type: "multiple_choice",
+        question: `What do I have? (Câu ${i + 1}/3)`,
+        options: options.sort(() => prng.next() - 0.5),
+        answers: [targetWord.word],
+      });
     }
 
     return {
       title: "Listen and Choose",
-      transcript: [
-        {
-          speaker: "Audio",
-          text: `I have a ${targetWord.word.toLowerCase()}.`,
-          id: "t1",
-        },
-      ],
-      questions: [
-        {
-          type: "multiple_choice",
-          question: `What do I have? (Chủ đề: ${topic})`,
-          options: options.sort(() => prng.next() - 0.5),
-          answers: [targetWord.word],
-        },
-      ],
+      transcript: transcripts,
+      questions: questions,
     };
   }
 
   if (type === "kids_speaking") {
-    const word1 = selectedWords[0];
-    const word2 = selectedWords[1];
+    const bullets = [];
+    for (let i = 0; i < 3; i++) {
+      const w = selectedWords[i % selectedWords.length];
+      bullets.push(`I see a ${w.word.toLowerCase()}`);
+    }
     return {
       title: "Let's Talk!",
-      bulletPoints: [
-        `Say: Look at the ${word1.word.toLowerCase()} ${word1.emoji}`,
-        `Say: I like the ${word2.word.toLowerCase()} ${word2.emoji}`,
-      ],
+      bulletPoints: bullets,
       tip: "Nói thật to và rõ ràng nhé!",
     };
   }
 
   if (type === "kids_phonics") {
-    const word = selectedWords[0].word;
-    const firstLetter = word.charAt(0).toUpperCase();
-    const secondWord =
-      ALL_WORDS.find((w) => w.word !== word && w.word.startsWith(firstLetter))
-        ?.word || "Apple";
+    const bullets = [];
+    for (let i = 0; i < 3; i++) {
+      const word = selectedWords[i % selectedWords.length].word;
+      bullets.push(word);
+    }
+    const firstLetter = bullets[0].charAt(0).toUpperCase();
     return {
       title: "Phonics Fun!",
-      bulletPoints: [word, secondWord],
+      bulletPoints: bullets,
       tip: `Âm /${firstLetter}/ trong tiếng Anh nhé!`,
     };
   }
 
   if (type === "kids_reading") {
-    const w1 = selectedWords[0];
-    const w2 = selectedWords[1];
+    const questions = [];
+    const paragraphs = [];
+    for (let i = 0; i < 5; i++) {
+      const w1 = selectedWords[(i * 2) % selectedWords.length];
+      const w2 = selectedWords[(i * 2 + 1) % selectedWords.length];
+      paragraphs.push(`This is a ${w1.word.toLowerCase()} ${w1.emoji}. It likes the ${w2.word.toLowerCase()} ${w2.emoji}.`);
+      questions.push({
+        question: `What does the ${w1.word.toLowerCase()} like? (Câu ${i + 1}/5)`,
+        options: [w2.word, selectedWords[(i+2)%selectedWords.length].word, selectedWords[(i+3)%selectedWords.length].word].sort(
+          () => prng.next() - 0.5,
+        ),
+        answers: [w2.word],
+      });
+    }
     return {
-      title: `The ${w1.word}`,
-      paragraphs: [
-        `This is a ${w1.word.toLowerCase()} ${w1.emoji}. The ${w1.word.toLowerCase()} is very happy. It likes to play with the ${w2.word.toLowerCase()} ${w2.emoji}.`,
-      ],
-      questions: [
-        {
-          question: `What does the ${w1.word.toLowerCase()} like to play with?`,
-          options: [w2.word, selectedWords[2].word, selectedWords[3].word].sort(
-            () => prng.next() - 0.5,
-          ),
-          answers: [w2.word],
-        },
-      ],
+      title: `Reading Practice`,
+      paragraphs: paragraphs,
+      questions: questions,
     };
   }
 
   if (type === "kids_writing") {
-    const w = selectedWords[0];
+    const writingData = [];
+    for (let i = 0; i < 3; i++) {
+      const w = selectedWords[i % selectedWords.length];
+      writingData.push({
+        question: `Sắp xếp thành câu: is / a / This / ${w.word.toLowerCase()} (Câu ${i + 1}/3)`,
+        answer: `This is a ${w.word.toLowerCase()}`,
+      });
+    }
     return {
       title: "Make a Sentence",
-      question: `Sắp xếp các từ sau thành câu đúng: is / a / This / ${w.word.toLowerCase()}`,
-      answer: `This is a ${w.word.toLowerCase()}`,
+      items: writingData,
       tip: "Nhớ viết hoa chữ cái đầu tiên nhé.",
     };
   }

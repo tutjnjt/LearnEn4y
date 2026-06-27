@@ -77,7 +77,10 @@ export function KidJourneyMap({
                  />
               </svg>
 
-              <div className={`flex flex-col items-center relative ${isLevelEven ? '-translate-y-16' : 'translate-y-16'}`}>
+              <div 
+                className={`flex flex-col items-center relative ${isLevelEven ? '-translate-y-16' : 'translate-y-16'} cursor-pointer`}
+                onClick={() => isUnlocked && onSelectLevel(lvl.id)}
+              >
                 {isActive && (
                   <motion.div layoutId="avatar" className="absolute z-20 animate-bounce -top-16" transition={{ type: "spring", stiffness: 100, damping: 15 }}>
                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-4xl shadow-lg border-4 border-orange-400">
@@ -87,7 +90,7 @@ export function KidJourneyMap({
                   </motion.div>
                 )}
 
-                <div className="flex gap-1 mb-2 bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm shadow-sm">
+                <div className="flex gap-1 mb-2 bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm shadow-sm pointer-events-none">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star
                       key={s}
@@ -96,9 +99,7 @@ export function KidJourneyMap({
                   ))}
                 </div>
 
-                <button
-                  onClick={() => isUnlocked && onSelectLevel(lvl.id)}
-                  disabled={!isUnlocked}
+                <div
                   className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex flex-col items-center justify-center text-3xl sm:text-4xl shadow-md border-8 transition-transform z-10 ${
                     isActive
                       ? "border-orange-400 scale-110 bg-orange-50"
@@ -108,7 +109,7 @@ export function KidJourneyMap({
                   }`}
                 >
                   {lvl.emoji}
-                </button>
+                </div>
 
                 <div
                   className={`font-black text-center px-4 py-2 rounded-2xl border-2 shadow-sm whitespace-nowrap min-w-[120px] mt-4 ${

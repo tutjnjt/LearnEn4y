@@ -15,6 +15,7 @@ import {
   Volume2,
   Puzzle,
   Clock,
+  FileText,
 } from "lucide-react";
 import { KidFlashcard } from "../types";
 import { KidMemoryMatrix } from "./KidMemoryMatrix";
@@ -85,21 +86,30 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
     }
   };
 
-  const [completedLevels, setCompletedLevels] = useState<Record<string, boolean>>({});
-  const [gameStars, setGameStars] = useState<
-    Record<string, Record<string, number>>
-  >({});
-  const [avatar, setAvatar] = useState("🦊");
+  const [completedLevels, setCompletedLevels] = useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem('kid_completedLevels') || '{}'); } catch { return {}; }
+  });
+  const [gameStars, setGameStars] = useState<Record<string, Record<string, number>>>(() => {
+    try { return JSON.parse(localStorage.getItem('kid_gameStars') || '{}'); } catch { return {}; }
+  });
+  const [avatar, setAvatar] = useState(() => localStorage.getItem('kid_avatar') || '🦊');
   const [showAvatarSelect, setShowAvatarSelect] = useState(false);
   const avatars = ["👧", "👦", "🦊", "🐶", "🐱", "🐼", "🐯", "🐰", "🐻", "🐸"];
   const [flashcards, setFlashcards] = useState<KidFlashcard[]>([]);
   const [skillData, setSkillData] = useState<any>(null);
   const [gameMode, setGameMode] = useState<string | null>(null); // 'matrix', 'match', 'kids_listening', etc.
   const [error, setError] = useState<string | null>(null);
-  const [stars, setStars] = useState(0);
-  const [points, setPoints] = useState(0);
-  const [playTime, setPlayTime] = useState(0);
-  
+  const [stars, setStars] = useState(() => parseInt(localStorage.getItem('kid_stars') || '0', 10));
+  const [points, setPoints] = useState(() => parseInt(localStorage.getItem('kid_points') || '0', 10));
+  const [playTime, setPlayTime] = useState(() => parseInt(localStorage.getItem('kid_playTime') || '0', 10));
+
+  useEffect(() => { localStorage.setItem('kid_completedLevels', JSON.stringify(completedLevels)); }, [completedLevels]);
+  useEffect(() => { localStorage.setItem('kid_gameStars', JSON.stringify(gameStars)); }, [gameStars]);
+  useEffect(() => { localStorage.setItem('kid_avatar', avatar); }, [avatar]);
+  useEffect(() => { localStorage.setItem('kid_stars', stars.toString()); }, [stars]);
+  useEffect(() => { localStorage.setItem('kid_points', points.toString()); }, [points]);
+  useEffect(() => { localStorage.setItem('kid_playTime', playTime.toString()); }, [playTime]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setPlayTime(prev => prev + 1);
