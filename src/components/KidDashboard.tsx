@@ -28,19 +28,27 @@ import { KidReportModal } from "./KidReportModal";
 import BalloonMatch from "./games/BalloonMatch";
 import SoundMemory from "./games/SoundMemory";
 import MagicColoring from "./games/MagicColoring";
-import { generateKidsData } from "../utils/kidsDataGenerator";
+import { generateKidsData, IPA_DATA } from "../utils/kidsDataGenerator";
 import { speak } from "../utils/audio";
 
 export function KidDashboard({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState<string | null>(null);
   const [view, setView] = useState<"home" | "ipa_map" | "ipa_menu" | "books" | "volumes" | "map" | "menu">("home");
-  const [ipaLevel, setIpaLevel] = useState("ipa_week_1_2");
+  const [ipaLevel, setIpaLevel] = useState("ipa_stage_1");
 
   const ipaLevels = [
-    { id: "ipa_week_1_2", name: "Nguyên âm ngắn & dài", emoji: "👄" },
-    { id: "ipa_week_3_4", name: "Nguyên âm đôi", emoji: "🗣️" },
-    { id: "ipa_week_5_6", name: "Phụ âm", emoji: "🦷" },
-    { id: "ipa_week_7_8", name: "Ghép vần & Đọc từ", emoji: "📖" },
+    { id: "ipa_stage_1", name: "Nguyên âm 1 (/i:/, /ɪ/, /ʊ/, /u:/)", emoji: "👄" },
+    { id: "ipa_stage_2", name: "Nguyên âm 2 (/e/, /ə/, /ɜ:/, /ɔ:/)", emoji: "👄" },
+    { id: "ipa_stage_3", name: "Nguyên âm 3 (/æ/, /ʌ/, /ɑ:/, /ɒ/)", emoji: "👄" },
+    { id: "ipa_stage_4", name: "Nguyên âm đôi 1 (/ɪə/, /eə/, /ʊə/, /eɪ/)", emoji: "🗣️" },
+    { id: "ipa_stage_5", name: "Nguyên âm đôi 2 (/ɔɪ/, /aɪ/, /əʊ/, /aʊ/)", emoji: "🗣️" },
+    { id: "ipa_stage_6", name: "Phụ âm 1 (/p/, /b/, /t/, /d/)", emoji: "🦷" },
+    { id: "ipa_stage_7", name: "Phụ âm 2 (/k/, /g/, /f/, /v/)", emoji: "🦷" },
+    { id: "ipa_stage_8", name: "Phụ âm 3 (/θ/, /ð/, /s/, /z/)", emoji: "🦷" },
+    { id: "ipa_stage_9", name: "Phụ âm 4 (/ʃ/, /ʒ/, /tʃ/, /dʒ/)", emoji: "🦷" },
+    { id: "ipa_stage_10", name: "Phụ âm 5 (/m/, /n/, /ŋ/, /h/)", emoji: "🦷" },
+    { id: "ipa_stage_11", name: "Phụ âm 6 (/l/, /r/, /w/, /j/)", emoji: "🦷" },
+    { id: "ipa_stage_12", name: "Ghép vần & Đọc từ", emoji: "📖" },
   ];
 
   const speakWord = (word: string) => {
@@ -1484,181 +1492,25 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           </div>
 
           {/* Theory Section */}
-          {ipaLevel === "ipa_week_1_2" && (
-            <div className="bg-blue-50 border-4 border-blue-200 rounded-3xl p-8 mb-8 shadow-sm">
-              <h3 className="text-2xl font-black text-blue-800 mb-4 flex items-center gap-2">
-                <BookOpen className="w-8 h-8" /> Lý Thuyết: Nguyên Âm Đơn (Monophthongs)
-              </h3>
-              <p className="text-blue-900 font-medium mb-6 text-lg">Là các nguyên âm không thay đổi độ cao và vị trí trong khi phát âm. Hãy nghe và quan sát khẩu hình miệng:</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-blue-600">/i:/ (i dài)</span>
-                    <button onClick={() => speakWord("sheep")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi bè ra hai bên như đang mỉm cười, miệng mở hẹp.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> sheep /ʃi:p/, see /si:/</p>
-                </div>
-                
-                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-blue-600">/ɪ/ (i ngắn)</span>
-                    <button onClick={() => speakWord("sit")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Giống /i:/ nhưng mở miệng rộng hơn một chút, âm phát ra ngắn.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> sit /sɪt/, it /ɪt/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-blue-600">/ʊ/ (u ngắn)</span>
-                    <button onClick={() => speakWord("book")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi hơi tròn và mở hẹp, lưỡi đưa về phía sau.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> book /bʊk/, put /pʊt/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-blue-600">/u:/ (u dài)</span>
-                    <button onClick={() => speakWord("food")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi chu tròn ra phía trước, lưỡi nâng cao ở phía sau.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> food /fu:d/, school /sku:l/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-blue-600">/e/ (e ngắn)</span>
-                    <button onClick={() => speakWord("bed")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Mở miệng vừa phải, lưỡi đặt thấp hơn âm /ɪ/.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> bed /bed/, ten /ten/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-blue-600">/æ/ (e bẹt)</span>
-                    <button onClick={() => speakWord("cat")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Miệng mở rộng hết cỡ (nửa a nửa e), lưỡi đặt thấp.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> cat /kæt/, bad /bæd/</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {ipaLevel === "ipa_week_3_4" && (
-            <div className="bg-purple-50 border-4 border-purple-200 rounded-3xl p-8 mb-8 shadow-sm">
-              <h3 className="text-2xl font-black text-purple-800 mb-4 flex items-center gap-2">
-                <BookOpen className="w-8 h-8" /> Lý Thuyết: Nguyên Âm Đôi (Diphthongs)
-              </h3>
-              <p className="text-purple-900 font-medium mb-6 text-lg">Là kết hợp của 2 nguyên âm đơn. Môi và lưỡi sẽ di chuyển mượt mà từ âm thứ nhất sang âm thứ hai.</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-white rounded-2xl p-4 border-2 border-purple-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-purple-600">/eɪ/</span>
-                    <button onClick={() => speakWord("face")} className="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Cách đọc:</strong> Bắt đầu bằng âm /e/, sau đó trượt nhanh môi sang âm /ɪ/.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> face /feɪs/, train /treɪn/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-purple-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-purple-600">/aɪ/</span>
-                    <button onClick={() => speakWord("bike")} className="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Cách đọc:</strong> Mở rộng miệng phát âm /a/, trượt nhanh sang /ɪ/.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> bike /baɪk/, time /taɪm/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-purple-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-purple-600">/ɔɪ/</span>
-                    <button onClick={() => speakWord("boy")} className="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Cách đọc:</strong> Bắt đầu bằng môi tròn /ɔ/, kéo dài và mỉm cười nhẹ sang /ɪ/.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> boy /bɔɪ/, coin /kɔɪn/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-purple-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-purple-600">/aʊ/</span>
-                    <button onClick={() => speakWord("house")} className="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Cách đọc:</strong> Bắt đầu bằng âm /a/ mở rộng miệng, sau đó chu tròn môi sang /ʊ/.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> house /haʊs/, cow /kaʊ/</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {ipaLevel === "ipa_week_5_6" && (
-            <div className="bg-emerald-50 border-4 border-emerald-200 rounded-3xl p-8 mb-8 shadow-sm">
-              <h3 className="text-2xl font-black text-emerald-800 mb-4 flex items-center gap-2">
-                <BookOpen className="w-8 h-8" /> Lý Thuyết: Phụ Âm (Consonants)
-              </h3>
-              <p className="text-emerald-900 font-medium mb-6 text-lg">Âm thanh phát ra bị cản trở bởi môi, răng, lưỡi. Hãy chú ý những âm đặc trưng:</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-white rounded-2xl p-4 border-2 border-emerald-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-emerald-600">/θ/ (Vô thanh)</span>
-                    <button onClick={() => speakWord("three")} className="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Đặt lưỡi giữa hai hàm răng, thổi luồng hơi ra, cổ họng không rung.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> three /θri:/, thumb /θʌm/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-emerald-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-emerald-600">/ð/ (Hữu thanh)</span>
-                    <button onClick={() => speakWord("that")} className="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Đặt lưỡi giữa hai hàm răng, phát âm và rung mạnh ở cổ họng.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> that /ðæt/, this /ðɪs/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-emerald-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-emerald-600">/ʃ/ (Vô thanh)</span>
-                    <button onClick={() => speakWord("shoe")} className="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi chu tròn ra phía trước, thổi hơi mạnh (như đang suỵt).</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> shoe /ʃu:/, fish /fɪʃ/</p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border-2 border-emerald-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-black text-emerald-600">/tʃ/ (Vô thanh)</span>
-                    <button onClick={() => speakWord("chair")} className="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200"><Volume2 className="w-5 h-5"/></button>
-                  </div>
-                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi chu ra, bật hơi mạnh giống chữ 'ch' trong tiếng Việt nhưng bật hơi.</p>
-                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> chair /tʃeə/, watch /wɒtʃ/</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {ipaLevel === "ipa_week_7_8" && (
-            <div className="bg-orange-50 border-4 border-orange-200 rounded-3xl p-8 mb-8 shadow-sm">
-              <h3 className="text-2xl font-black text-orange-800 mb-4 flex items-center gap-2">
-                <BookOpen className="w-8 h-8" /> Lý Thuyết: Ghép Vần & Đọc Từ
-              </h3>
-              <p className="text-orange-900 font-medium mb-6 text-lg">
-                Khi đã nắm vững các âm, bé có thể nhìn phiên âm để tự ghép vần và đọc mọi từ tiếng Anh.
-              </p>
-              <div className="bg-white rounded-2xl p-6 border-2 border-orange-100 space-y-4">
+          <div className="bg-blue-50 border-4 border-blue-200 rounded-3xl p-8 mb-8 shadow-sm">
+            <h3 className="text-2xl font-black text-blue-800 mb-4 flex items-center gap-2">
+              <BookOpen className="w-8 h-8" /> Lý Thuyết: {ipaLevels.find(l => l.id === ipaLevel)?.name}
+            </h3>
+            <p className="text-blue-900 font-medium mb-6 text-lg">
+              {ipaLevel === "ipa_stage_12" 
+                ? "Khi đã nắm vững các âm, bé có thể nhìn phiên âm để tự ghép vần và đọc mọi từ tiếng Anh."
+                : "Hãy nghe và quan sát các từ vựng đại diện cho các âm này:"}
+            </p>
+            
+            {ipaLevel === "ipa_stage_12" ? (
+              <div className="bg-white rounded-2xl p-6 border-2 border-blue-100 space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="bg-orange-100 text-orange-600 p-3 rounded-full">
+                  <div className="bg-blue-100 text-blue-600 p-3 rounded-full">
                     <Volume2 className="w-6 h-6"/>
                   </div>
                   <div>
-                    <h4 className="font-bold text-orange-800 text-xl flex items-center gap-2">
-                      Cách đánh vần IPA <button onClick={() => speakWord("apple")} className="text-sm bg-orange-100 px-3 py-1 rounded-full hover:bg-orange-200">Nghe "apple"</button>
+                    <h4 className="font-bold text-blue-800 text-xl flex items-center gap-2 mb-2">
+                      Cách đánh vần IPA <button onClick={() => speakWord("apple")} className="text-sm bg-blue-100 px-3 py-1 rounded-full text-blue-600 hover:bg-blue-200 ml-2">Nghe "apple"</button>
                     </h4>
                     <p className="text-slate-600 mt-2">
                       Ví dụ từ <strong>apple</strong> có phiên âm là <strong>/ˈæpl/</strong>.
@@ -1667,8 +1519,25 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {IPA_DATA[ipaLevel]?.slice(0, 4).map((item, idx) => (
+                  <div key={idx} className="bg-white rounded-2xl p-6 border-2 border-blue-100 flex flex-col items-center justify-center text-center group hover:border-blue-400 transition-colors shadow-sm">
+                    <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{item.emoji}</div>
+                    <div className="text-2xl font-black text-slate-800 mb-1">{item.word}</div>
+                    <div className="text-xl font-bold text-blue-500 mb-1">{item.ipa}</div>
+                    <div className="text-sm text-slate-500 mb-4">{item.vi}</div>
+                    <button 
+                      onClick={() => speakWord(item.word)} 
+                      className="p-3 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 hover:scale-110 transition-all"
+                    >
+                      <Volume2 className="w-6 h-6"/>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div>
             <h2 className="text-3xl font-black text-purple-600 mb-6 flex items-center justify-center gap-2">
