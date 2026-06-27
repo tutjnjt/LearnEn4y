@@ -14,6 +14,7 @@ import {
   Plus,
   Volume2,
   Puzzle,
+  Clock,
 } from "lucide-react";
 import { KidFlashcard } from "../types";
 import { KidMemoryMatrix } from "./KidMemoryMatrix";
@@ -97,6 +98,21 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [stars, setStars] = useState(0);
   const [points, setPoints] = useState(0);
+  const [playTime, setPlayTime] = useState(0);
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPlayTime(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   const [winOverlay, setWinOverlay] = useState<{
     stars: number;
     points: number;
@@ -1116,6 +1132,10 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
         </div>
         <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-blue-100 px-4 py-2 rounded-full font-bold text-blue-600 border-2 border-blue-200 shadow-sm" title="Thời gian học">
+              <Clock className="w-5 h-5 text-blue-500" />
+              <span className="text-xl">{formatTime(playTime)}</span>
+            </div>
             <div className="flex items-center gap-1 bg-yellow-100 px-4 py-2 rounded-full font-bold text-yellow-600 border-2 border-yellow-200 shadow-sm">
               <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
               <span className="text-xl">{stars}</span>
