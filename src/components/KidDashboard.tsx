@@ -1730,7 +1730,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
                 <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-amber-100 text-amber-500">
                   <Star className="w-8 h-8" />
                 </div>
-                <h3 className="font-black text-amber-800 text-center">Tìm Từ Trái Nghĩa</h3>
+                <h3 className="font-black text-amber-800 text-center">Ghép Từ và IPA</h3>
                 {loading === "balloon_match" && <Loader2 className="w-5 h-5 text-amber-500 mt-2 animate-spin" />}
               </button>
 

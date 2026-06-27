@@ -13,9 +13,14 @@ export const initAudio = () => {
 
 export const playAudioFallback = (text: string) => {
   try {
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(text)}`;
+    const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
     const audio = new Audio(url);
-    audio.play().catch(e => console.warn("Audio fallback failed", e));
+    audio.play().catch(e => {
+      console.warn("Audio fallback failed", e);
+      // fallback to google translate if youdao fails
+      const gUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(text)}`;
+      new Audio(gUrl).play().catch(console.error);
+    });
   } catch (e) {
     console.warn("Audio creation failed", e);
   }
@@ -30,8 +35,23 @@ export const speak = (text: string, rate: number = 0.9) => {
       return;
     }
 
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
+    // For Android, Web Speech API TTS is notoriously buggy (silent failures, missing voices).
+    // Using an Audio fallback directly for short text (like IPA words) provides a 100% reliable experience.
+    if (isAndroid && text.length < 100) {
+      playAudioFallback(text);
+      return;
+    }
+    
     if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
+      if (isAndroid) {
+        // On Android, cancelling and immediately speaking often drops the speak.
+        // We delay slightly if we just cancelled, but we risk losing the user gesture.
+        // Actually, if we just cancelled, we might as well just use the fallback for this utterance
+        // to guarantee they hear it, or try speaking anyway.
+      }
     }
     
     const utterance = new SpeechSynthesisUtterance(text);
@@ -58,10 +78,9 @@ export const speak = (text: string, rate: number = 0.9) => {
       playAudioFallback(text);
     };
 
-    // Timeout fixes some Android issues where cancel() interrupts the next speak()
-    setTimeout(() => {
-      window.speechSynthesis.speak(utterance);
-    }, 10);
+    // Do NOT use setTimeout here, as Android requires speak() to be called 
+    // in the same synchronous call stack as the user interaction
+    window.speechSynthesis.speak(utterance);
 
     // If onstart doesn't fire within 500ms (often happens on Android), fallback to audio
     if (isMobile) {

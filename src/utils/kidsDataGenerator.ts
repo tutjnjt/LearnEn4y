@@ -1,43 +1,43 @@
-const IPA_DATA: Record<string, { word: string; vi: string; emoji: string }[]> = {
+const IPA_DATA: Record<string, { word: string; vi: string; emoji: string; ipa: string }> = {
   ipa_week_1_2: [
-    { word: "Ship", vi: "Tàu thủy", emoji: "🚢" },
-    { word: "Sheep", vi: "Con cừu", emoji: "🐑" },
-    { word: "Sit", vi: "Ngồi", emoji: "🪑" },
-    { word: "Seat", vi: "Chỗ ngồi", emoji: "🛋️" },
-    { word: "Good", vi: "Tốt", emoji: "👍" },
-    { word: "Food", vi: "Thức ăn", emoji: "🍔" },
-    { word: "Bed", vi: "Cái giường", emoji: "🛏️" },
-    { word: "Bad", vi: "Tồi tệ", emoji: "👎" },
+    { word: "Ship", vi: "Tàu thủy", emoji: "🚢", ipa: "/ʃɪp/" },
+    { word: "Sheep", vi: "Con cừu", emoji: "🐑", ipa: "/ʃiːp/" },
+    { word: "Sit", vi: "Ngồi", emoji: "🪑", ipa: "/sɪt/" },
+    { word: "Seat", vi: "Chỗ ngồi", emoji: "🛋️", ipa: "/siːt/" },
+    { word: "Good", vi: "Tốt", emoji: "👍", ipa: "/gʊd/" },
+    { word: "Food", vi: "Thức ăn", emoji: "🍔", ipa: "/fuːd/" },
+    { word: "Bed", vi: "Cái giường", emoji: "🛏️", ipa: "/bed/" },
+    { word: "Bad", vi: "Tồi tệ", emoji: "👎", ipa: "/bæd/" },
   ],
   ipa_week_3_4: [
-    { word: "Face", vi: "Khuôn mặt", emoji: "😊" },
-    { word: "House", vi: "Ngôi nhà", emoji: "🏠" },
-    { word: "Boy", vi: "Cậu bé", emoji: "👦" },
-    { word: "Cow", vi: "Con bò", emoji: "🐮" },
-    { word: "Hair", vi: "Tóc", emoji: "💇" },
-    { word: "Ear", vi: "Cái tai", emoji: "👂" },
-    { word: "Train", vi: "Tàu hỏa", emoji: "🚆" },
-    { word: "Bike", vi: "Xe đạp", emoji: "🚲" },
+    { word: "Face", vi: "Khuôn mặt", emoji: "😊", ipa: "/feɪs/" },
+    { word: "House", vi: "Ngôi nhà", emoji: "🏠", ipa: "/haʊs/" },
+    { word: "Boy", vi: "Cậu bé", emoji: "👦", ipa: "/bɔɪ/" },
+    { word: "Cow", vi: "Con bò", emoji: "🐮", ipa: "/kaʊ/" },
+    { word: "Hair", vi: "Tóc", emoji: "💇", ipa: "/heər/" },
+    { word: "Ear", vi: "Cái tai", emoji: "👂", ipa: "/ɪər/" },
+    { word: "Train", vi: "Tàu hỏa", emoji: "🚆", ipa: "/treɪn/" },
+    { word: "Bike", vi: "Xe đạp", emoji: "🚲", ipa: "/baɪk/" },
   ],
   ipa_week_5_6: [
-    { word: "Three", vi: "Số ba", emoji: "3️⃣" },
-    { word: "That", vi: "Kia", emoji: "👉" },
-    { word: "Shoe", vi: "Chiếc giày", emoji: "👞" },
-    { word: "Chair", vi: "Cái ghế", emoji: "🪑" },
-    { word: "Cheese", vi: "Phô mai", emoji: "🧀" },
-    { word: "Watch", vi: "Đồng hồ", emoji: "⌚" },
-    { word: "Fish", vi: "Con cá", emoji: "🐟" },
-    { word: "Thumb", vi: "Ngón cái", emoji: "👍" },
+    { word: "Three", vi: "Số ba", emoji: "3️⃣", ipa: "/θriː/" },
+    { word: "That", vi: "Kia", emoji: "👉", ipa: "/ðæt/" },
+    { word: "Shoe", vi: "Chiếc giày", emoji: "👞", ipa: "/ʃuː/" },
+    { word: "Chair", vi: "Cái ghế", emoji: "🪑", ipa: "/tʃeər/" },
+    { word: "Cheese", vi: "Phô mai", emoji: "🧀", ipa: "/tʃiːz/" },
+    { word: "Watch", vi: "Đồng hồ", emoji: "⌚", ipa: "/wɒtʃ/" },
+    { word: "Fish", vi: "Con cá", emoji: "🐟", ipa: "/fɪʃ/" },
+    { word: "Thumb", vi: "Ngón cái", emoji: "👍", ipa: "/θʌm/" },
   ],
   ipa_week_7_8: [
-    { word: "Happy", vi: "Vui vẻ", emoji: "😁" },
-    { word: "Sunny", vi: "Trời nắng", emoji: "☀️" },
-    { word: "Tiger", vi: "Con hổ", emoji: "🐯" },
-    { word: "Monkey", vi: "Con khỉ", emoji: "🐵" },
-    { word: "Water", vi: "Nước", emoji: "💧" },
-    { word: "Flower", vi: "Bông hoa", emoji: "🌸" },
-    { word: "Apple", vi: "Quả táo", emoji: "🍎" },
-    { word: "Table", vi: "Cái bàn", emoji: "🪑" },
+    { word: "Happy", vi: "Vui vẻ", emoji: "😁", ipa: "/ˈhæpi/" },
+    { word: "Sunny", vi: "Trời nắng", emoji: "☀️", ipa: "/ˈsʌni/" },
+    { word: "Tiger", vi: "Con hổ", emoji: "🐯", ipa: "/ˈtaɪgər/" },
+    { word: "Monkey", vi: "Con khỉ", emoji: "🐵", ipa: "/ˈmʌŋki/" },
+    { word: "Water", vi: "Nước", emoji: "💧", ipa: "/ˈwɔːtər/" },
+    { word: "Flower", vi: "Bông hoa", emoji: "🌸", ipa: "/ˈflaʊər/" },
+    { word: "Apple", vi: "Quả táo", emoji: "🍎", ipa: "/ˈæpl/" },
+    { word: "Table", vi: "Cái bàn", emoji: "🪑", ipa: "/ˈteɪbl/" },
   ]
 };
 
@@ -320,10 +320,11 @@ export function generateKidsData(
         word: i.word,
         meaning_vi: i.vi,
         emoji: i.emoji,
+        ipa: i.ipa,
       }));
       if (pool.length < count) {
          const allIpa = Object.values(IPA_DATA).flat();
-         const remaining = allIpa.filter(w => !pool.find((p) => p.word === w.word)).map(i => ({ word: i.word, meaning_vi: i.vi, emoji: i.emoji }));
+         const remaining = allIpa.filter(w => !pool.find((p) => p.word === w.word)).map(i => ({ word: i.word, meaning_vi: i.vi, emoji: i.emoji, ipa: i.ipa }));
          pool = [...pool, ...remaining.sort(() => prng.next() - 0.5).slice(0, count - pool.length)];
       }
     } else {
@@ -360,26 +361,31 @@ export function generateKidsData(
   const selectedWords = getWords(wordCount);
 
   if (type === "ipa_opposites") {
-    const opposites = [
-      { word: "Hot", meaning_vi: "Cold", emoji: "🔥" },
-      { word: "Big", meaning_vi: "Small", emoji: "🐘" },
-      { word: "Fast", meaning_vi: "Slow", emoji: "🐇" },
-      { word: "Happy", meaning_vi: "Sad", emoji: "😁" },
-      { word: "Good", meaning_vi: "Bad", emoji: "👍" },
-      { word: "Day", meaning_vi: "Night", emoji: "☀️" },
-      { word: "Up", meaning_vi: "Down", emoji: "⬆️" },
-      { word: "Open", meaning_vi: "Close", emoji: "📖" },
-    ];
-    return { flashcards: opposites.sort(() => prng.next() - 0.5) };
+    // We map words to their IPA instead of meaning_vi, so balloon_match pairs Word <-> IPA
+    const ipaFlashcards = selectedWords.map((w) => ({
+      word: w.word,
+      meaning_vi: w.ipa || w.meaning_vi, // Fallback to meaning_vi if ipa is not set
+      emoji: w.emoji,
+    }));
+    return { flashcards: ipaFlashcards };
   }
 
   if (
     type === "kids_vocabulary" ||
     type === "matrix" ||
-    type === "match" ||
-    type === "ipa_match"
+    type === "match"
   ) {
     return { flashcards: selectedWords };
+  }
+
+  if (type === "ipa_match") {
+    // For Matrix/Matching games in IPA section, pair Word <-> IPA
+    const ipaFlashcards = selectedWords.map((w) => ({
+      word: w.word,
+      meaning_vi: w.ipa || w.meaning_vi,
+      emoji: w.emoji,
+    }));
+    return { flashcards: ipaFlashcards };
   }
 
   if (type === "ipa_symbol_reading") {
@@ -450,75 +456,49 @@ export function generateKidsData(
   }
 
   if (type === "ipa_quiz_1") {
-    // Bài tập 1: Chọn phiên âm đúng, Bài tập 3: Chọn từ phát âm khác, Bài tập 4: Chọn từ không có âm
-    const questions = [
-      {
-        question: `Phiên âm của từ "grab" là:`,
-        options: ["/ˈgɹæb/", "/ˈgræb/", "/ˈgɹaeb/", "/ˈkɹæb/"],
-        answers: ["/ˈgræb/"]
-      },
-      {
-        question: `Phiên âm của từ "pluck" là:`,
-        options: ["/ˈpluk/", "/ˈplək/", "/ˈplʌk/", "/ˈplʌck/"],
-        answers: ["/ˈplʌk/"]
-      },
-      {
-        question: `Phiên âm của từ "stream" là:`,
-        options: ["/ˈstrim/", "/ˈstriːm/", "/ˈstɹɪm/", "/ˈstɹim/"],
-        answers: ["/ˈstriːm/"]
-      },
-      {
-        question: `Phiên âm của từ "went" là:`,
-        options: ["/ˈwənt/", "/ˈwɛnt/", "/ˈwɪnt/", "/ˈwent/"],
-        answers: ["/ˈwent/"]
-      },
-      {
-        question: `Trong các từ sau, từ nào CÓ phát âm KHÁC các từ còn lại?`,
-        options: ["hear", "clear", "bear", "ear"],
-        answers: ["bear"]
-      },
-      {
-        question: `Trong các từ sau, từ nào CÓ phát âm KHÁC các từ còn lại?`,
-        options: ["blood", "pool", "food", "tool"],
-        answers: ["blood"]
-      },
-      {
-        question: `Trong các từ sau, từ nào KHÔNG CÓ âm /i:/?`,
-        options: ["Bean", "Pick", "Bead", "Peak"],
-        answers: ["Pick"]
-      },
-      {
-        question: `Trong các từ sau, từ nào KHÔNG CÓ âm /e/?`,
-        options: ["Bell", "Bed", "Feed", "Fed"],
-        answers: ["Feed"]
+    const questions = [];
+    // Generate questions: Chọn phiên âm đúng cho từ
+    for (let i = 0; i < 5; i++) {
+      const targetWord = selectedWords[i % selectedWords.length];
+      const targetIpa = targetWord.ipa || `/${targetWord.word.toLowerCase()}/`; // fallback
+      
+      const options = [targetIpa];
+      while(options.length < 4) {
+        const randomWord = ALL_WORDS[Math.floor(prng.next() * ALL_WORDS.length)];
+        const randomIpa = randomWord.ipa || `/${randomWord.word.toLowerCase()}/`;
+        if (!options.includes(randomIpa)) {
+          options.push(randomIpa);
+        }
       }
-    ];
+      
+      questions.push({
+        question: `Phiên âm của từ "${targetWord.word}" là:`,
+        options: options.sort(() => prng.next() - 0.5),
+        answers: [targetIpa]
+      });
+    }
+
     return {
       title: "Trắc Nghiệm IPA",
-      questions: questions.sort(() => prng.next() - 0.5).slice(0, 5), // Choose 5 random questions
+      questions: questions,
     };
   }
 
   if (type === "ipa_quiz_2") {
-    // Bài tập 2: Viết từ tương ứng với cách phát âm, Bài tập 5: Điền nguyên âm đôi
-    const items = [
-      { question: `Viết từ có phiên âm: /hɒt/`, answer: "hot" },
-      { question: `Viết từ có phiên âm: /wɒnt/`, answer: "want" },
-      { question: `Viết từ có phiên âm: /tʊk/`, answer: "took" },
-      { question: `Viết từ có phiên âm: /bɜːd/`, answer: "bird" },
-      { question: `Viết từ có phiên âm: /wɜːk/`, answer: "work" },
-      { question: `Viết từ có phiên âm: /tri:/`, answer: "tree" },
-      { question: `Viết từ có phiên âm: /gɒt/`, answer: "got" },
-      { question: `Điền nguyên âm đôi cho từ DAY: /d ____/`, answer: "eɪ" },
-      { question: `Điền nguyên âm đôi cho từ BOY: /b ____/`, answer: "ɔɪ" },
-      { question: `Điền nguyên âm đôi cho từ HOW: /h ____/`, answer: "aʊ" },
-      { question: `Điền nguyên âm đôi cho từ SHOW: /ʃ ____/`, answer: "əʊ" },
-      { question: `Điền nguyên âm đôi cho từ HIGH: /h ____/`, answer: "aɪ" },
-    ];
+    const items = [];
+    for (let i = 0; i < 4; i++) {
+      const targetWord = selectedWords[i % selectedWords.length];
+      const targetIpa = targetWord.ipa || `/${targetWord.word.toLowerCase()}/`;
+      items.push({
+        question: `Viết từ có phiên âm: ${targetIpa}`,
+        answer: targetWord.word.toLowerCase()
+      });
+    }
+    
     return {
       title: "Thử Thách Viết IPA",
-      items: items.sort(() => prng.next() - 0.5).slice(0, 4), // Choose 4 random items
-      tip: "Chú ý gõ chính xác từ hoặc ký hiệu IPA nhé!",
+      items: items,
+      tip: "Chú ý gõ chính xác từ tương ứng với phiên âm nhé!",
     };
   }
 
