@@ -30,7 +30,9 @@ export const speak = (text: string, rate: number = 0.9) => {
       return;
     }
 
-    window.speechSynthesis.cancel();
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
@@ -56,7 +58,10 @@ export const speak = (text: string, rate: number = 0.9) => {
       playAudioFallback(text);
     };
 
-    window.speechSynthesis.speak(utterance);
+    // Timeout fixes some Android issues where cancel() interrupts the next speak()
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 10);
 
     // If onstart doesn't fire within 500ms (often happens on Android), fallback to audio
     if (isMobile) {

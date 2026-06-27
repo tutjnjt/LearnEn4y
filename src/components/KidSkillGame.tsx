@@ -209,9 +209,9 @@ export function KidSkillGame({
     setMissedWords([]);
     
     let totalSteps = 1;
-    if (type === "kids_listening" || type === "kids_reading") totalSteps = data.questions?.length || 1;
-    else if (type === "kids_speaking" || type === "kids_phonics") totalSteps = data.bulletPoints?.length || 1;
-    else if (type === "kids_writing") totalSteps = data.items?.length || 1;
+    if (type === "kids_listening" || type === "kids_reading" || type === "ipa_quiz_1") totalSteps = data.questions?.length || 1;
+    else if (type === "kids_speaking" || type === "kids_phonics" || type === "ipa_visual" || type === "ipa_speaking") totalSteps = data.bulletPoints?.length || 1;
+    else if (type === "kids_writing" || type === "ipa_quiz_2") totalSteps = data.items?.length || 1;
 
     if (step < totalSteps - 1) {
       setStep((s) => s + 1);
@@ -237,25 +237,27 @@ export function KidSkillGame({
     }
   };
 
-  if (type === "kids_listening") {
+  if (type === "kids_listening" || type === "ipa_quiz_1") {
     const q = data.questions?.[step];
     return (
-      <div className="bg-white p-8 rounded-3xl border-4 border-indigo-200 shadow-sm max-w-2xl mx-auto text-center animate-in zoom-in">
-        <h3 className="text-2xl font-black text-indigo-600 mb-6">
+      <div className={`bg-white p-8 rounded-3xl border-4 ${type === "ipa_quiz_1" ? "border-purple-200" : "border-indigo-200"} shadow-sm max-w-2xl mx-auto text-center animate-in zoom-in`}>
+        <h3 className={`text-2xl font-black ${type === "ipa_quiz_1" ? "text-purple-600" : "text-indigo-600"} mb-6`}>
           {data.title}
         </h3>
-        <button
-          onClick={() => speakText(data.transcript[step]?.text || "")}
-          className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-8 hover:bg-indigo-200 hover:scale-110 transition-all text-indigo-500 shadow-sm border-4 border-indigo-300"
-        >
-          <Volume2 className="w-12 h-12" />
-        </button>
+        {type === "kids_listening" && (
+          <button
+            onClick={() => speakText(data.transcript[step]?.text || "")}
+            className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-8 hover:bg-indigo-200 hover:scale-110 transition-all text-indigo-500 shadow-sm border-4 border-indigo-300"
+          >
+            <Volume2 className="w-12 h-12" />
+          </button>
+        )}
         {q && (
           <div>
             <p className="text-xl font-bold text-slate-800 mb-6">
               {q.question}
             </p>
-            <div className="space-y-3">
+            <div className={`grid ${type === "ipa_quiz_1" ? "grid-cols-1 sm:grid-cols-2 gap-4" : "grid-cols-1 space-y-3"}`}>
               {q.options?.map((opt: string, i: number) => (
                 <button
                   key={i}
@@ -278,9 +280,9 @@ export function KidSkillGame({
     );
   }
 
-  if (type === "kids_speaking" || type === "kids_phonics") {
+  if (type === "kids_speaking" || type === "kids_phonics" || type === "ipa_visual" || type === "ipa_speaking") {
     const targetText = data.bulletPoints?.[step] || "";
-    const isPhonics = type === "kids_phonics";
+    const isPhonics = type === "kids_phonics" || type === "ipa_visual";
     const themeColor = isPhonics ? "pink" : "emerald";
     return (
       <div
@@ -291,6 +293,18 @@ export function KidSkillGame({
         >
           {data.title}
         </h3>
+        
+        {type === "ipa_visual" && data.shapes?.[step] && (
+          <div className="flex flex-col items-center justify-center mb-6">
+            <div className="w-32 h-32 bg-pink-100 rounded-full flex items-center justify-center border-4 border-pink-200 text-6xl shadow-sm animate-bounce mb-4">
+              {data.shapes[step].emoji}
+            </div>
+            <p className="text-lg font-bold text-pink-600 bg-pink-50 py-2 px-4 rounded-xl border border-pink-100">
+              {data.shapes[step].desc}
+            </p>
+          </div>
+        )}
+
         <div
           className={`${isPhonics ? "bg-pink-50 border-pink-100" : "bg-emerald-50 border-emerald-100"} border-2 p-6 rounded-2xl mb-6`}
         >
@@ -405,19 +419,19 @@ export function KidSkillGame({
     );
   }
 
-  if (type === "kids_writing") {
+  if (type === "kids_writing" || type === "ipa_quiz_2") {
     const currentItem = data.items?.[step];
     return (
-      <div className="bg-white p-8 rounded-3xl border-4 border-rose-200 shadow-sm max-w-2xl mx-auto text-center animate-in zoom-in">
-        <h3 className="text-2xl font-black text-rose-600 mb-6">{data.title}</h3>
-        <div className="bg-rose-50 border-2 border-rose-100 p-6 rounded-2xl mb-8">
+      <div className={`bg-white p-8 rounded-3xl border-4 ${type === "ipa_quiz_2" ? "border-purple-200" : "border-rose-200"} shadow-sm max-w-2xl mx-auto text-center animate-in zoom-in`}>
+        <h3 className={`text-2xl font-black ${type === "ipa_quiz_2" ? "text-purple-600" : "text-rose-600"} mb-6`}>{data.title}</h3>
+        <div className={`${type === "ipa_quiz_2" ? "bg-purple-50 border-purple-100" : "bg-rose-50 border-rose-100"} border-2 p-6 rounded-2xl mb-8`}>
           <p className="text-xl font-bold text-slate-800 leading-relaxed">
             {currentItem?.question}
           </p>
         </div>
         <div className="relative max-w-md mx-auto mb-6">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Type className="h-6 w-6 text-rose-300" />
+            <Type className={`h-6 w-6 ${type === "ipa_quiz_2" ? "text-purple-300" : "text-rose-300"}`} />
           </div>
           <input
             type="text"
@@ -429,33 +443,54 @@ export function KidSkillGame({
                 ? "border-amber-400"
                 : isCorrect === true
                   ? "border-emerald-400"
-                  : "border-rose-200"
-            } rounded-2xl font-bold text-xl text-slate-800 focus:outline-none focus:border-rose-400 placeholder:text-slate-300 transition-colors`}
+                  : type === "ipa_quiz_2" ? "border-purple-200 focus:border-purple-400" : "border-rose-200 focus:border-rose-400"
+            } rounded-2xl font-bold text-xl text-slate-800 focus:outline-none placeholder:text-slate-300 transition-colors`}
           />
         </div>
+
+        {type === "ipa_quiz_2" && (
+          <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-lg mx-auto">
+            {["i", "ɪ", "u", "ʊ", "e", "ə", "ɜ", "ɔ", "æ", "ʌ", "ɑ", "ɒ", "ː", "θ", "ð", "ʃ", "ʒ", "ŋ", "dʒ", "tʃ"].map((sym) => (
+              <button
+                key={sym}
+                onClick={() => setWritingInput((prev) => prev + sym)}
+                className="px-3 py-2 bg-purple-100 text-purple-700 font-bold rounded-lg border-2 border-purple-200 hover:bg-purple-200 hover:scale-105 transition-transform"
+              >
+                {sym}
+              </button>
+            ))}
+          </div>
+        )}
+
         {isCorrect === false && (
           <p className="text-amber-600 font-bold mb-4 animate-bounce">
             Chưa chính xác rồi, bé thử lại nhé! 🤔
           </p>
         )}
-        <p className="text-rose-600 font-medium mb-8">Mẹo: {data.tip}</p>
+        <p className={`${type === "ipa_quiz_2" ? "text-purple-600" : "text-rose-600"} font-medium mb-8`}>Mẹo: {data.tip}</p>
         <button
           onClick={() => {
             if (!currentItem?.answer) {
               moveToNextStep();
               return;
             }
-            // normalized comparison
-            const correctStr = currentItem.answer
-              .toLowerCase()
-              .replace(/[^a-z0-9\s]/g, "")
-              .trim();
-            const inputStr = writingInput
-              .toLowerCase()
-              .replace(/[^a-z0-9\s]/g, "")
-              .trim();
+            
+            let isMatch = false;
+            if (type === "ipa_quiz_2") {
+              isMatch = currentItem.answer.trim().toLowerCase() === writingInput.trim().toLowerCase();
+            } else {
+              const correctStr = currentItem.answer
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, "")
+                .trim();
+              const inputStr = writingInput
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, "")
+                .trim();
+              isMatch = correctStr === inputStr;
+            }
 
-            if (correctStr === inputStr) {
+            if (isMatch) {
               setIsCorrect(true);
               setTimeout(() => {
                 moveToNextStep();
@@ -466,7 +501,7 @@ export function KidSkillGame({
             }
           }}
           disabled={!writingInput.trim()}
-          className="w-full py-4 bg-rose-500 text-white font-black text-xl rounded-2xl shadow-sm hover:bg-rose-600 transition-colors flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full py-4 ${type === "ipa_quiz_2" ? "bg-purple-500 hover:bg-purple-600" : "bg-rose-500 hover:bg-rose-600"} text-white font-black text-xl rounded-2xl shadow-sm transition-colors flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           Nộp bài
           <CheckCircle2 className="w-6 h-6" />

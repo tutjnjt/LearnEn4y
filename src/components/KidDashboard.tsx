@@ -16,6 +16,8 @@ import {
   Puzzle,
   Clock,
   FileText,
+  Sparkles,
+  Play,
 } from "lucide-react";
 import { KidFlashcard } from "../types";
 import { KidMemoryMatrix } from "./KidMemoryMatrix";
@@ -27,12 +29,24 @@ import BalloonMatch from "./games/BalloonMatch";
 import SoundMemory from "./games/SoundMemory";
 import MagicColoring from "./games/MagicColoring";
 import { generateKidsData } from "../utils/kidsDataGenerator";
+import { speak } from "../utils/audio";
 
 export function KidDashboard({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState<string | null>(null);
-  const [view, setView] = useState<"books" | "volumes" | "map" | "menu">(
-    "books",
-  );
+  const [view, setView] = useState<"home" | "ipa_map" | "ipa_menu" | "books" | "volumes" | "map" | "menu">("home");
+  const [ipaLevel, setIpaLevel] = useState("ipa_week_1_2");
+
+  const ipaLevels = [
+    { id: "ipa_week_1_2", name: "Nguyên âm ngắn & dài", emoji: "👄" },
+    { id: "ipa_week_3_4", name: "Nguyên âm đôi", emoji: "🗣️" },
+    { id: "ipa_week_5_6", name: "Phụ âm", emoji: "🦷" },
+    { id: "ipa_week_7_8", name: "Ghép vần & Đọc từ", emoji: "📖" },
+  ];
+
+  const speakWord = (word: string) => {
+    speak(word);
+  };
+
   const [level, setLevel] = useState("Level 1");
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedVolume, setSelectedVolume] = useState<number | null>(null);
@@ -130,11 +144,11 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   } | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
-  const stateRef = useRef({ view, gameMode, winOverlay, showReportForLevel: showReportForLevel });
+  const stateRef = useRef({ view, gameMode, winOverlay, showReportForLevel, ipaLevel });
   
   useEffect(() => {
-    stateRef.current = { view, gameMode, winOverlay, showReportForLevel };
-  }, [view, gameMode, winOverlay, showReportForLevel]);
+    stateRef.current = { view, gameMode, winOverlay, showReportForLevel, ipaLevel };
+  }, [view, gameMode, winOverlay, showReportForLevel, ipaLevel]);
 
   useEffect(() => {
     // Push an initial state when entering KidDashboard
@@ -159,6 +173,12 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
         window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else if (s.view === "volumes") {
         setView("books");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
+      } else if (s.view === "books" || s.view === "ipa_map") {
+        setView("home");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
+      } else if (s.view === "ipa_menu") {
+        setView("ipa_map");
         window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else {
         onBack();
@@ -230,13 +250,20 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
     setSkillData(null);
     setGameMode(null);
     try {
-      const bookName =
-        allBooks.find((b) => b.id === selectedBook)?.name || selectedBook;
-      const currentLevelObj = levels.find((l) => l.id === level);
-      const topic =
-        (currentLevelObj as any)?.topic || currentLevelObj?.name || "";
+      let bookName = "IPA";
+      let topic = "";
+      let currentLevelId = level;
+      
+      if (view === "ipa_menu") {
+        currentLevelId = ipaLevel;
+        topic = ipaLevels.find((l) => l.id === ipaLevel)?.name || "";
+      } else {
+        bookName = allBooks.find((b) => b.id === selectedBook)?.name || selectedBook || "";
+        const currentLevelObj = levels.find((l) => l.id === level);
+        topic = (currentLevelObj as any)?.topic || currentLevelObj?.name || "";
+      }
 
-      const cacheKey = `kids_game_v6_${selectedBook}_${selectedVolume}_${level}_${type}_${mode}`;
+      const cacheKey = `kids_game_v6_${bookName}_${selectedVolume}_${currentLevelId}_${type}_${mode}`;
       const cachedData = localStorage.getItem(cacheKey);
 
       let data;
@@ -245,7 +272,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
       } else {
         // Use offline generator directly instead of API for kids dashboard
         // to prevent lag, timeouts, or errors.
-        data = generateKidsData(type, level, bookName, selectedVolume, topic);
+        data = generateKidsData(type, currentLevelId, bookName, selectedVolume || 1, topic);
         try {
           localStorage.setItem(cacheKey, JSON.stringify(data));
         } catch (storageError) {
@@ -253,7 +280,11 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
         }
       }
 
-      if (type === "kids_vocabulary") {
+      if (
+        type === "kids_vocabulary" ||
+        type === "ipa_match" ||
+        type === "ipa_opposites"
+      ) {
         setFlashcards(data.flashcards || []);
       } else {
         setSkillData(data);
@@ -1186,10 +1217,53 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
+      {/* Home View */}
+      {view === "home" && !gameMode && (
+        <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative animate-in fade-in slide-in-from-bottom-4">
+          <h2 className="text-3xl font-black text-center text-slate-800 mb-2">
+            Hôm nay bé muốn học gì nào?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            <button
+              onClick={() => setView("ipa_map")}
+              className="flex flex-col items-center justify-center p-8 bg-purple-50 border-4 border-purple-200 rounded-3xl shadow-sm hover:border-purple-400 hover:-translate-y-2 transition-all group"
+            >
+              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-5xl mb-4 group-hover:scale-110 transition-transform shadow-sm border-4 border-purple-100">
+                🗣️
+              </div>
+              <h3 className="text-2xl font-black text-purple-700 mb-2">Học Phát Âm IPA</h3>
+              <p className="text-purple-600 font-medium text-center">
+                Luyện phát âm chuẩn xác với 44 âm cơ bản!
+              </p>
+            </button>
+            <button
+              onClick={() => setView("books")}
+              className="flex flex-col items-center justify-center p-8 bg-blue-50 border-4 border-blue-200 rounded-3xl shadow-sm hover:border-blue-400 hover:-translate-y-2 transition-all group"
+            >
+              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-5xl mb-4 group-hover:scale-110 transition-transform shadow-sm border-4 border-blue-100">
+                📚
+              </div>
+              <h3 className="text-2xl font-black text-blue-700 mb-2">Học Theo Sách</h3>
+              <p className="text-blue-600 font-medium text-center">
+                Ôn tập từ vựng theo chương trình trên lớp!
+              </p>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Books View */}
       {view === "books" && !gameMode && (
         <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative animate-in fade-in slide-in-from-bottom-4">
-          <h2 className="text-3xl font-black text-center text-slate-800 mb-2">
+          <div className="absolute top-4 left-4">
+            <button
+              onClick={() => setView("home")}
+              className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-orange-500 transition-colors bg-slate-50 px-3 py-2 rounded-xl border-2 border-slate-200"
+            >
+              <ArrowLeft className="w-4 h-4" /> Quay Lại
+            </button>
+          </div>
+          <h2 className="text-3xl font-black text-center text-slate-800 mb-2 mt-4">
             Chọn Bộ Sách Của Bé
           </h2>
           <p className="text-center font-bold text-slate-500 mb-8">
@@ -1318,6 +1392,37 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
+      {/* IPA Map View */}
+      {view === "ipa_map" && !gameMode && (
+        <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative">
+          <div className="absolute top-4 left-4">
+            <button
+              onClick={() => setView("home")}
+              className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-purple-500 transition-colors bg-slate-50 px-3 py-2 rounded-xl border-2 border-slate-200"
+            >
+              <ArrowLeft className="w-4 h-4" /> Về Trang Chủ
+            </button>
+          </div>
+          <h2 className="text-3xl font-black text-center text-slate-800 mb-2 mt-4 sm:mt-0">
+            Hành Trình Chinh Phục IPA
+          </h2>
+          <p className="text-center font-bold text-slate-500 mb-12">
+            Cùng học 44 âm cơ bản để nói tiếng Anh thật chuẩn nhé!
+          </p>
+
+          <KidJourneyMap
+            levels={ipaLevels}
+            currentLevelIndex={ipaLevels.findIndex(l => l.id === ipaLevel)}
+            levelStars={{}}
+            avatar={avatar}
+            onSelectLevel={(id) => {
+              setIpaLevel(id);
+              setView("ipa_menu");
+            }}
+          />
+        </div>
+      )}
+
       {/* Map View */}
       {view === "map" && !gameMode && (
         <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative">
@@ -1346,6 +1451,303 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
               setView("menu");
             }}
           />
+        </div>
+      )}
+
+      {/* IPA Menu View */}
+      {view === "ipa_menu" && !gameMode && (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => setView("ipa_map")}
+              className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-500 transition-colors bg-white px-4 py-3 rounded-2xl border-4 border-slate-100 shadow-sm"
+            >
+              <ArrowLeft className="w-5 h-5" /> Trở Lại Lộ Trình
+            </button>
+            <div className="bg-purple-100 text-purple-600 px-4 py-2 rounded-xl font-bold border-2 border-purple-200">
+              {ipaLevels.find((l) => l.id === ipaLevel)?.emoji}{" "}
+              {ipaLevels.find((l) => l.id === ipaLevel)?.name}
+            </div>
+          </div>
+
+          {/* Theory Section */}
+          {ipaLevel === "ipa_week_1_2" && (
+            <div className="bg-blue-50 border-4 border-blue-200 rounded-3xl p-8 mb-8 shadow-sm">
+              <h3 className="text-2xl font-black text-blue-800 mb-4 flex items-center gap-2">
+                <BookOpen className="w-8 h-8" /> Lý Thuyết: Nguyên Âm Đơn (Monophthongs)
+              </h3>
+              <p className="text-blue-900 font-medium mb-6 text-lg">Là các nguyên âm không thay đổi độ cao và vị trí trong khi phát âm. Hãy nghe và quan sát khẩu hình miệng:</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-blue-600">/i:/ (i dài)</span>
+                    <button onClick={() => speakWord("sheep")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi bè ra hai bên như đang mỉm cười, miệng mở hẹp.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> sheep /ʃi:p/, see /si:/</p>
+                </div>
+                
+                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-blue-600">/ɪ/ (i ngắn)</span>
+                    <button onClick={() => speakWord("sit")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Giống /i:/ nhưng mở miệng rộng hơn một chút, âm phát ra ngắn.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> sit /sɪt/, it /ɪt/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-blue-600">/ʊ/ (u ngắn)</span>
+                    <button onClick={() => speakWord("book")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi hơi tròn và mở hẹp, lưỡi đưa về phía sau.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> book /bʊk/, put /pʊt/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-blue-600">/u:/ (u dài)</span>
+                    <button onClick={() => speakWord("food")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi chu tròn ra phía trước, lưỡi nâng cao ở phía sau.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> food /fu:d/, school /sku:l/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-blue-600">/e/ (e ngắn)</span>
+                    <button onClick={() => speakWord("bed")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Mở miệng vừa phải, lưỡi đặt thấp hơn âm /ɪ/.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> bed /bed/, ten /ten/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-blue-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-blue-600">/æ/ (e bẹt)</span>
+                    <button onClick={() => speakWord("cat")} className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Miệng mở rộng hết cỡ (nửa a nửa e), lưỡi đặt thấp.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> cat /kæt/, bad /bæd/</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {ipaLevel === "ipa_week_3_4" && (
+            <div className="bg-purple-50 border-4 border-purple-200 rounded-3xl p-8 mb-8 shadow-sm">
+              <h3 className="text-2xl font-black text-purple-800 mb-4 flex items-center gap-2">
+                <BookOpen className="w-8 h-8" /> Lý Thuyết: Nguyên Âm Đôi (Diphthongs)
+              </h3>
+              <p className="text-purple-900 font-medium mb-6 text-lg">Là kết hợp của 2 nguyên âm đơn. Môi và lưỡi sẽ di chuyển mượt mà từ âm thứ nhất sang âm thứ hai.</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white rounded-2xl p-4 border-2 border-purple-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-purple-600">/eɪ/</span>
+                    <button onClick={() => speakWord("face")} className="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Cách đọc:</strong> Bắt đầu bằng âm /e/, sau đó trượt nhanh môi sang âm /ɪ/.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> face /feɪs/, train /treɪn/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-purple-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-purple-600">/aɪ/</span>
+                    <button onClick={() => speakWord("bike")} className="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Cách đọc:</strong> Mở rộng miệng phát âm /a/, trượt nhanh sang /ɪ/.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> bike /baɪk/, time /taɪm/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-purple-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-purple-600">/ɔɪ/</span>
+                    <button onClick={() => speakWord("boy")} className="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Cách đọc:</strong> Bắt đầu bằng môi tròn /ɔ/, kéo dài và mỉm cười nhẹ sang /ɪ/.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> boy /bɔɪ/, coin /kɔɪn/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-purple-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-purple-600">/aʊ/</span>
+                    <button onClick={() => speakWord("house")} className="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Cách đọc:</strong> Bắt đầu bằng âm /a/ mở rộng miệng, sau đó chu tròn môi sang /ʊ/.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> house /haʊs/, cow /kaʊ/</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {ipaLevel === "ipa_week_5_6" && (
+            <div className="bg-emerald-50 border-4 border-emerald-200 rounded-3xl p-8 mb-8 shadow-sm">
+              <h3 className="text-2xl font-black text-emerald-800 mb-4 flex items-center gap-2">
+                <BookOpen className="w-8 h-8" /> Lý Thuyết: Phụ Âm (Consonants)
+              </h3>
+              <p className="text-emerald-900 font-medium mb-6 text-lg">Âm thanh phát ra bị cản trở bởi môi, răng, lưỡi. Hãy chú ý những âm đặc trưng:</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white rounded-2xl p-4 border-2 border-emerald-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-emerald-600">/θ/ (Vô thanh)</span>
+                    <button onClick={() => speakWord("three")} className="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Đặt lưỡi giữa hai hàm răng, thổi luồng hơi ra, cổ họng không rung.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> three /θri:/, thumb /θʌm/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-emerald-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-emerald-600">/ð/ (Hữu thanh)</span>
+                    <button onClick={() => speakWord("that")} className="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Đặt lưỡi giữa hai hàm răng, phát âm và rung mạnh ở cổ họng.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> that /ðæt/, this /ðɪs/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-emerald-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-emerald-600">/ʃ/ (Vô thanh)</span>
+                    <button onClick={() => speakWord("shoe")} className="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi chu tròn ra phía trước, thổi hơi mạnh (như đang suỵt).</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> shoe /ʃu:/, fish /fɪʃ/</p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 border-2 border-emerald-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-2xl font-black text-emerald-600">/tʃ/ (Vô thanh)</span>
+                    <button onClick={() => speakWord("chair")} className="p-2 bg-emerald-100 text-emerald-600 rounded-full hover:bg-emerald-200"><Volume2 className="w-5 h-5"/></button>
+                  </div>
+                  <p className="text-slate-600 text-sm mb-1"><strong>Khẩu hình:</strong> Môi chu ra, bật hơi mạnh giống chữ 'ch' trong tiếng Việt nhưng bật hơi.</p>
+                  <p className="text-slate-500 text-sm"><strong>Ví dụ:</strong> chair /tʃeə/, watch /wɒtʃ/</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {ipaLevel === "ipa_week_7_8" && (
+            <div className="bg-orange-50 border-4 border-orange-200 rounded-3xl p-8 mb-8 shadow-sm">
+              <h3 className="text-2xl font-black text-orange-800 mb-4 flex items-center gap-2">
+                <BookOpen className="w-8 h-8" /> Lý Thuyết: Ghép Vần & Đọc Từ
+              </h3>
+              <p className="text-orange-900 font-medium mb-6 text-lg">
+                Khi đã nắm vững các âm, bé có thể nhìn phiên âm để tự ghép vần và đọc mọi từ tiếng Anh.
+              </p>
+              <div className="bg-white rounded-2xl p-6 border-2 border-orange-100 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="bg-orange-100 text-orange-600 p-3 rounded-full">
+                    <Volume2 className="w-6 h-6"/>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-orange-800 text-xl flex items-center gap-2">
+                      Cách đánh vần IPA <button onClick={() => speakWord("apple")} className="text-sm bg-orange-100 px-3 py-1 rounded-full hover:bg-orange-200">Nghe "apple"</button>
+                    </h4>
+                    <p className="text-slate-600 mt-2">
+                      Ví dụ từ <strong>apple</strong> có phiên âm là <strong>/ˈæpl/</strong>.
+                      Đọc âm /æ/ mạnh hơn (vì có dấu ' nhấn trọng âm), sau đó đọc nối âm /p/ và /l/ lại với nhau.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <h2 className="text-3xl font-black text-purple-600 mb-6 flex items-center justify-center gap-2">
+              <Sparkles className="w-8 h-8" />
+              Luyện Tập Phát Âm
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <button
+                onClick={() => fetchGame("ipa_visual", "ipa_visual")}
+                disabled={loading !== null}
+                className="relative flex flex-col items-center justify-center p-6 bg-pink-50 border-4 border-pink-200 rounded-3xl shadow-sm hover:border-pink-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+              >
+                {renderStars("ipa_visual")}
+                <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-pink-100 text-pink-500">
+                  <Play className="w-8 h-8" />
+                </div>
+                <h3 className="font-black text-pink-800 text-center">Khẩu Hình & Âm Thanh</h3>
+                {loading === "ipa_visual" && <Loader2 className="w-5 h-5 text-pink-500 mt-2 animate-spin" />}
+              </button>
+
+              <button
+                onClick={() => fetchGame("ipa_speaking", "ipa_speaking")}
+                disabled={loading !== null}
+                className="relative flex flex-col items-center justify-center p-6 bg-emerald-50 border-4 border-emerald-200 rounded-3xl shadow-sm hover:border-emerald-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+              >
+                {renderStars("ipa_speaking")}
+                <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-emerald-100 text-emerald-500">
+                  <Mic className="w-8 h-8" />
+                </div>
+                <h3 className="font-black text-emerald-800 text-center">Thực Hành Phát Âm</h3>
+                {loading === "ipa_speaking" && <Loader2 className="w-5 h-5 text-emerald-500 mt-2 animate-spin" />}
+              </button>
+
+              <button
+                onClick={() => fetchGame("ipa_match", "matrix")}
+                disabled={loading !== null}
+                className="relative flex flex-col items-center justify-center p-6 bg-blue-50 border-4 border-blue-200 rounded-3xl shadow-sm hover:border-blue-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+              >
+                {renderStars("matrix")}
+                <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-blue-100 text-blue-500">
+                  <Puzzle className="w-8 h-8" />
+                </div>
+                <h3 className="font-black text-blue-800 text-center">Ghép Âm Nối Chữ</h3>
+                {loading === "matrix" && <Loader2 className="w-5 h-5 text-blue-500 mt-2 animate-spin" />}
+              </button>
+            </div>
+
+            <h2 className="text-3xl font-black text-purple-600 mb-6 flex items-center justify-center gap-2 mt-12">
+              <FileText className="w-8 h-8" />
+              Bài Tập Thực Hành
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <button
+                onClick={() => fetchGame("ipa_opposites", "balloon_match")}
+                disabled={loading !== null}
+                className="relative flex flex-col items-center justify-center p-6 bg-amber-50 border-4 border-amber-200 rounded-3xl shadow-sm hover:border-amber-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+              >
+                {renderStars("balloon_match")}
+                <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-amber-100 text-amber-500">
+                  <Star className="w-8 h-8" />
+                </div>
+                <h3 className="font-black text-amber-800 text-center">Tìm Từ Trái Nghĩa</h3>
+                {loading === "balloon_match" && <Loader2 className="w-5 h-5 text-amber-500 mt-2 animate-spin" />}
+              </button>
+
+              <button
+                onClick={() => fetchGame("ipa_quiz_1", "ipa_quiz_1")}
+                disabled={loading !== null}
+                className="relative flex flex-col items-center justify-center p-6 bg-purple-50 border-4 border-purple-200 rounded-3xl shadow-sm hover:border-purple-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+              >
+                {renderStars("ipa_quiz_1")}
+                <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-purple-100 text-purple-500">
+                  <FileText className="w-8 h-8" />
+                </div>
+                <h3 className="font-black text-purple-800 text-center">Trắc Nghiệm IPA</h3>
+                {loading === "ipa_quiz_1" && <Loader2 className="w-5 h-5 text-purple-500 mt-2 animate-spin" />}
+              </button>
+
+              <button
+                onClick={() => fetchGame("ipa_quiz_2", "ipa_quiz_2")}
+                disabled={loading !== null}
+                className="relative flex flex-col items-center justify-center p-6 bg-rose-50 border-4 border-rose-200 rounded-3xl shadow-sm hover:border-rose-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+              >
+                {renderStars("ipa_quiz_2")}
+                <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-rose-100 text-rose-500">
+                  <FileText className="w-8 h-8" />
+                </div>
+                <h3 className="font-black text-rose-800 text-center">Thử Thách Viết IPA</h3>
+                {loading === "ipa_quiz_2" && <Loader2 className="w-5 h-5 text-rose-500 mt-2 animate-spin" />}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1790,6 +2192,10 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           "kids_phonics",
           "kids_reading",
           "kids_writing",
+          "ipa_visual",
+          "ipa_speaking",
+          "ipa_quiz_1",
+          "ipa_quiz_2",
         ].includes(gameMode || "") &&
           skillData && (
             <div className="animate-in fade-in slide-in-from-bottom-8">

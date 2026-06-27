@@ -1,3 +1,46 @@
+const IPA_DATA: Record<string, { word: string; vi: string; emoji: string }[]> = {
+  ipa_week_1_2: [
+    { word: "Ship", vi: "Tàu thủy", emoji: "🚢" },
+    { word: "Sheep", vi: "Con cừu", emoji: "🐑" },
+    { word: "Sit", vi: "Ngồi", emoji: "🪑" },
+    { word: "Seat", vi: "Chỗ ngồi", emoji: "🛋️" },
+    { word: "Good", vi: "Tốt", emoji: "👍" },
+    { word: "Food", vi: "Thức ăn", emoji: "🍔" },
+    { word: "Bed", vi: "Cái giường", emoji: "🛏️" },
+    { word: "Bad", vi: "Tồi tệ", emoji: "👎" },
+  ],
+  ipa_week_3_4: [
+    { word: "Face", vi: "Khuôn mặt", emoji: "😊" },
+    { word: "House", vi: "Ngôi nhà", emoji: "🏠" },
+    { word: "Boy", vi: "Cậu bé", emoji: "👦" },
+    { word: "Cow", vi: "Con bò", emoji: "🐮" },
+    { word: "Hair", vi: "Tóc", emoji: "💇" },
+    { word: "Ear", vi: "Cái tai", emoji: "👂" },
+    { word: "Train", vi: "Tàu hỏa", emoji: "🚆" },
+    { word: "Bike", vi: "Xe đạp", emoji: "🚲" },
+  ],
+  ipa_week_5_6: [
+    { word: "Three", vi: "Số ba", emoji: "3️⃣" },
+    { word: "That", vi: "Kia", emoji: "👉" },
+    { word: "Shoe", vi: "Chiếc giày", emoji: "👞" },
+    { word: "Chair", vi: "Cái ghế", emoji: "🪑" },
+    { word: "Cheese", vi: "Phô mai", emoji: "🧀" },
+    { word: "Watch", vi: "Đồng hồ", emoji: "⌚" },
+    { word: "Fish", vi: "Con cá", emoji: "🐟" },
+    { word: "Thumb", vi: "Ngón cái", emoji: "👍" },
+  ],
+  ipa_week_7_8: [
+    { word: "Happy", vi: "Vui vẻ", emoji: "😁" },
+    { word: "Sunny", vi: "Trời nắng", emoji: "☀️" },
+    { word: "Tiger", vi: "Con hổ", emoji: "🐯" },
+    { word: "Monkey", vi: "Con khỉ", emoji: "🐵" },
+    { word: "Water", vi: "Nước", emoji: "💧" },
+    { word: "Flower", vi: "Bông hoa", emoji: "🌸" },
+    { word: "Apple", vi: "Quả táo", emoji: "🍎" },
+    { word: "Table", vi: "Cái bàn", emoji: "🪑" },
+  ]
+};
+
 export const KIDS_CATEGORIES: Record<
   string,
   { word: string; vi: string; emoji: string }[]
@@ -270,23 +313,38 @@ export function generateKidsData(
 
   const getWords = (count: number) => {
     let pool = ALL_WORDS;
-    const matchedCategory = determineCategory(topic);
-    if (matchedCategory) {
-      pool = KIDS_CATEGORIES[matchedCategory].map((i) => ({
+    
+    if (level.startsWith("ipa_")) {
+      const ipaWords = IPA_DATA[level] || IPA_DATA["ipa_week_1_2"];
+      pool = ipaWords.map((i) => ({
         word: i.word,
         meaning_vi: i.vi,
         emoji: i.emoji,
       }));
       if (pool.length < count) {
-        const remaining = ALL_WORDS.filter(
-          (w) => !pool.find((p) => p.word === w.word),
-        );
-        pool = [
-          ...pool,
-          ...remaining
-            .sort(() => prng.next() - 0.5)
-            .slice(0, count - pool.length),
-        ];
+         const allIpa = Object.values(IPA_DATA).flat();
+         const remaining = allIpa.filter(w => !pool.find((p) => p.word === w.word)).map(i => ({ word: i.word, meaning_vi: i.vi, emoji: i.emoji }));
+         pool = [...pool, ...remaining.sort(() => prng.next() - 0.5).slice(0, count - pool.length)];
+      }
+    } else {
+      const matchedCategory = determineCategory(topic);
+      if (matchedCategory) {
+        pool = KIDS_CATEGORIES[matchedCategory].map((i) => ({
+          word: i.word,
+          meaning_vi: i.vi,
+          emoji: i.emoji,
+        }));
+        if (pool.length < count) {
+          const remaining = ALL_WORDS.filter(
+            (w) => !pool.find((p) => p.word === w.word),
+          );
+          pool = [
+            ...pool,
+            ...remaining
+              .sort(() => prng.next() - 0.5)
+              .slice(0, count - pool.length),
+          ];
+        }
       }
     }
     const shuffled = [...pool].sort(() => prng.next() - 0.5);
@@ -301,8 +359,158 @@ export function generateKidsData(
         : 8;
   const selectedWords = getWords(wordCount);
 
-  if (type === "kids_vocabulary" || type === "matrix" || type === "match") {
+  if (type === "ipa_opposites") {
+    const opposites = [
+      { word: "Hot", meaning_vi: "Cold", emoji: "🔥" },
+      { word: "Big", meaning_vi: "Small", emoji: "🐘" },
+      { word: "Fast", meaning_vi: "Slow", emoji: "🐇" },
+      { word: "Happy", meaning_vi: "Sad", emoji: "😁" },
+      { word: "Good", meaning_vi: "Bad", emoji: "👍" },
+      { word: "Day", meaning_vi: "Night", emoji: "☀️" },
+      { word: "Up", meaning_vi: "Down", emoji: "⬆️" },
+      { word: "Open", meaning_vi: "Close", emoji: "📖" },
+    ];
+    return { flashcards: opposites.sort(() => prng.next() - 0.5) };
+  }
+
+  if (
+    type === "kids_vocabulary" ||
+    type === "matrix" ||
+    type === "match" ||
+    type === "ipa_match"
+  ) {
     return { flashcards: selectedWords };
+  }
+
+  if (type === "ipa_visual") {
+    const mouthShapes: Record<string, { desc: string; emoji: string }> = {
+      i: { desc: "Môi hơi bè ra hai bên như đang mỉm cười.", emoji: "😁" },
+      e: { desc: "Mở miệng vừa phải, lưỡi đặt thấp.", emoji: "😮" },
+      o: { desc: "Môi hơi tròn, mở rộng.", emoji: "😦" },
+      a: { desc: "Miệng mở to, lưỡi hạ thấp.", emoji: "😮‍💨" },
+      u: { desc: "Môi chu tròn ra phía trước.", emoji: "😗" },
+      s: { desc: "Hai hàm răng gần khép lại, thổi hơi ra.", emoji: "😬" },
+      sh: { desc: "Môi chu ra, thổi hơi mạnh (như đang suỵt).", emoji: "🤫" },
+      ch: { desc: "Môi hơi chu ra, bật hơi mạnh.", emoji: "🤫" },
+      t: { desc: "Đầu lưỡi chạm ngạc cứng trên, bật hơi.", emoji: "👅" },
+      d: { desc: "Đầu lưỡi chạm ngạc cứng trên, rung dây thanh.", emoji: "👅" },
+      b: { desc: "Hai môi mím lại rồi bật ra, rung dây thanh.", emoji: "👄" },
+      p: { desc: "Hai môi mím lại rồi bật hơi ra ngoài.", emoji: "👄" },
+      f: { desc: "Răng trên chạm môi dưới, thổi hơi.", emoji: "😬" },
+      v: { desc: "Răng trên chạm môi dưới, rung dây thanh.", emoji: "😬" },
+      m: { desc: "Hai môi mím lại, âm thoát ra đường mũi.", emoji: "👄" },
+      n: { desc: "Đầu lưỡi chạm ngạc cứng trên, âm thoát mũi.", emoji: "👅" },
+      w: { desc: "Môi tròn, hơi chu ra trước.", emoji: "😗" },
+      h: { desc: "Mở miệng tự nhiên, đẩy hơi nhẹ ra.", emoji: "😮" },
+      g: { desc: "Cuống lưỡi chạm ngạc mềm, rung thanh quản.", emoji: "😮" },
+      c: { desc: "Cuống lưỡi chạm ngạc mềm, bật hơi.", emoji: "😮" },
+      k: { desc: "Cuống lưỡi chạm ngạc mềm, bật hơi.", emoji: "😮" },
+    };
+
+    const bullets = [];
+    const shapes = [];
+    for (let i = 0; i < 3; i++) {
+      const word = selectedWords[i % selectedWords.length].word;
+      const lowerWord = word.toLowerCase();
+      let firstSound = lowerWord.charAt(0);
+      if (lowerWord.startsWith("sh")) firstSound = "sh";
+      else if (lowerWord.startsWith("ch")) firstSound = "ch";
+
+      bullets.push(word);
+      shapes.push(mouthShapes[firstSound] || { desc: "Mở miệng tự nhiên và phát âm to rõ.", emoji: "👄" });
+    }
+    return {
+      title: "Khẩu Hình & Âm Thanh",
+      bulletPoints: bullets,
+      shapes: shapes,
+      tip: `Nhìn kỹ khẩu hình miệng khi đọc âm nhé!`,
+    };
+  }
+
+  if (type === "ipa_quiz_1") {
+    // Bài tập 1: Chọn phiên âm đúng, Bài tập 3: Chọn từ phát âm khác, Bài tập 4: Chọn từ không có âm
+    const questions = [
+      {
+        question: `Phiên âm của từ "grab" là:`,
+        options: ["/ˈgɹæb/", "/ˈgræb/", "/ˈgɹaeb/", "/ˈkɹæb/"],
+        answers: ["/ˈgræb/"]
+      },
+      {
+        question: `Phiên âm của từ "pluck" là:`,
+        options: ["/ˈpluk/", "/ˈplək/", "/ˈplʌk/", "/ˈplʌck/"],
+        answers: ["/ˈplʌk/"]
+      },
+      {
+        question: `Phiên âm của từ "stream" là:`,
+        options: ["/ˈstrim/", "/ˈstriːm/", "/ˈstɹɪm/", "/ˈstɹim/"],
+        answers: ["/ˈstriːm/"]
+      },
+      {
+        question: `Phiên âm của từ "went" là:`,
+        options: ["/ˈwənt/", "/ˈwɛnt/", "/ˈwɪnt/", "/ˈwent/"],
+        answers: ["/ˈwent/"]
+      },
+      {
+        question: `Trong các từ sau, từ nào CÓ phát âm KHÁC các từ còn lại?`,
+        options: ["hear", "clear", "bear", "ear"],
+        answers: ["bear"]
+      },
+      {
+        question: `Trong các từ sau, từ nào CÓ phát âm KHÁC các từ còn lại?`,
+        options: ["blood", "pool", "food", "tool"],
+        answers: ["blood"]
+      },
+      {
+        question: `Trong các từ sau, từ nào KHÔNG CÓ âm /i:/?`,
+        options: ["Bean", "Pick", "Bead", "Peak"],
+        answers: ["Pick"]
+      },
+      {
+        question: `Trong các từ sau, từ nào KHÔNG CÓ âm /e/?`,
+        options: ["Bell", "Bed", "Feed", "Fed"],
+        answers: ["Feed"]
+      }
+    ];
+    return {
+      title: "Trắc Nghiệm IPA",
+      questions: questions.sort(() => prng.next() - 0.5).slice(0, 5), // Choose 5 random questions
+    };
+  }
+
+  if (type === "ipa_quiz_2") {
+    // Bài tập 2: Viết từ tương ứng với cách phát âm, Bài tập 5: Điền nguyên âm đôi
+    const items = [
+      { question: `Viết từ có phiên âm: /hɒt/`, answer: "hot" },
+      { question: `Viết từ có phiên âm: /wɒnt/`, answer: "want" },
+      { question: `Viết từ có phiên âm: /tʊk/`, answer: "took" },
+      { question: `Viết từ có phiên âm: /bɜːd/`, answer: "bird" },
+      { question: `Viết từ có phiên âm: /wɜːk/`, answer: "work" },
+      { question: `Viết từ có phiên âm: /tri:/`, answer: "tree" },
+      { question: `Viết từ có phiên âm: /gɒt/`, answer: "got" },
+      { question: `Điền nguyên âm đôi cho từ DAY: /d ____/`, answer: "eɪ" },
+      { question: `Điền nguyên âm đôi cho từ BOY: /b ____/`, answer: "ɔɪ" },
+      { question: `Điền nguyên âm đôi cho từ HOW: /h ____/`, answer: "aʊ" },
+      { question: `Điền nguyên âm đôi cho từ SHOW: /ʃ ____/`, answer: "əʊ" },
+      { question: `Điền nguyên âm đôi cho từ HIGH: /h ____/`, answer: "aɪ" },
+    ];
+    return {
+      title: "Thử Thách Viết IPA",
+      items: items.sort(() => prng.next() - 0.5).slice(0, 4), // Choose 4 random items
+      tip: "Chú ý gõ chính xác từ hoặc ký hiệu IPA nhé!",
+    };
+  }
+
+  if (type === "ipa_speaking") {
+    const bullets = [];
+    for (let i = 0; i < 3; i++) {
+      const w = selectedWords[i % selectedWords.length];
+      bullets.push(w.word); // Just say the word
+    }
+    return {
+      title: "Thực Hành Phát Âm",
+      bulletPoints: bullets,
+      tip: "Nói thật to và rõ ràng từng từ nhé!",
+    };
   }
 
   if (type === "kids_listening") {
