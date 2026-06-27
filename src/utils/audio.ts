@@ -13,7 +13,7 @@ export const initAudio = () => {
 
 export const playAudioFallback = (text: string) => {
   try {
-    const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(text)}`;
     const audio = new Audio(url);
     audio.play().catch(e => console.warn("Audio fallback failed", e));
   } catch (e) {

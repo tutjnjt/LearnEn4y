@@ -301,15 +301,16 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
     setStars((prev) => prev + earnedStars);
     setPoints((prev) => prev + earnedPoints);
     if (gameMode) {
+      const targetLevelId = view === "ipa_menu" ? ipaLevel : level;
       setGameStars((prev) => {
-        const currentLevelStars = prev[level] || {};
+        const currentLevelStars = prev[targetLevelId] || {};
         const newStars = Math.max(
           currentLevelStars[gameMode] || 0,
           earnedStars,
         );
         return {
           ...prev,
-          [level]: { ...currentLevelStars, [gameMode]: newStars },
+          [targetLevelId]: { ...currentLevelStars, [gameMode]: newStars },
         };
       });
     }
@@ -1120,6 +1121,18 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
     computedLevelStars[l.id] = maxPossible > 0 ? Math.round((totalEarned / maxPossible) * 5) : 0;
   });
 
+  const computedIpaLevelStars: Record<string, number> = {};
+  ipaLevels.forEach(l => {
+    const starsObj = gameStars[l.id] || {};
+    let totalEarned = 0;
+    const ipaGames = ["ipa_visual", "ipa_speaking", "ipa_quiz_1", "ipa_quiz_2"];
+    for (const key of ipaGames) {
+      totalEarned += starsObj[key] || 0;
+    }
+    const maxPossible = ipaGames.length * 5;
+    computedIpaLevelStars[l.id] = maxPossible > 0 ? Math.round((totalEarned / maxPossible) * 5) : 0;
+  });
+
   return (
     <div className="max-w-5xl mx-auto w-full p-4 sm:p-6 animate-in fade-in zoom-in duration-500 overflow-x-hidden">
       {/* Header */}
@@ -1412,8 +1425,8 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
 
           <KidJourneyMap
             levels={ipaLevels}
-            currentLevelIndex={ipaLevels.findIndex(l => l.id === ipaLevel)}
-            levelStars={{}}
+            currentLevelIndex={ipaLevels.length - 1}
+            levelStars={computedIpaLevelStars}
             avatar={avatar}
             onSelectLevel={(id) => {
               setIpaLevel(id);
