@@ -120,30 +120,43 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   } | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
+  const stateRef = useRef({ view, gameMode, winOverlay, showReportForLevel: showReportForLevel });
+  
   useEffect(() => {
+    stateRef.current = { view, gameMode, winOverlay, showReportForLevel };
+  }, [view, gameMode, winOverlay, showReportForLevel]);
+
+  useEffect(() => {
+    window.history.pushState({ isAppletLayer: true }, "");
+
     const handlePopState = () => {
-      setGameMode((prev) => {
-        if (prev !== null) {
-          return null;
-        }
-        return prev;
-      });
-      setWinOverlay(null);
+      const s = stateRef.current;
+      if (s.winOverlay) {
+        setWinOverlay(null);
+        window.history.pushState({ isAppletLayer: true }, "");
+      } else if (s.showReportForLevel) {
+        setShowReportForLevel(null);
+        window.history.pushState({ isAppletLayer: true }, "");
+      } else if (s.gameMode) {
+        setGameMode(null);
+        window.history.pushState({ isAppletLayer: true }, "");
+      } else if (s.view === "menu") {
+        setView("map");
+        window.history.pushState({ isAppletLayer: true }, "");
+      } else if (s.view === "map") {
+        setView("volumes");
+        window.history.pushState({ isAppletLayer: true }, "");
+      } else if (s.view === "volumes") {
+        setView("books");
+        window.history.pushState({ isAppletLayer: true }, "");
+      } else {
+        onBack();
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  useEffect(() => {
-    if (gameMode) {
-      window.history.pushState({ isGameMode: true }, "");
-    } else {
-      if (window.history.state && window.history.state.isGameMode) {
-        window.history.back();
-      }
-    }
-  }, [gameMode]);
+  }, [onBack]);
 
   useEffect(() => {
     if (gameMode && gameAreaRef.current) {
@@ -1131,7 +1144,10 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           </div>
         </div>
         <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1 bg-emerald-100 px-4 py-2 rounded-full font-bold text-emerald-600 border-2 border-emerald-200 shadow-sm" title="Tiến độ hoàn thành">
+              <span className="text-xl">🏆 {levels.length > 0 ? Math.round((levels.filter(l => completedLevels[l.id]).length / levels.length) * 100) : 0}%</span>
+            </div>
             <div className="flex items-center gap-1 bg-blue-100 px-4 py-2 rounded-full font-bold text-blue-600 border-2 border-blue-200 shadow-sm" title="Thời gian học">
               <Clock className="w-5 h-5 text-blue-500" />
               <span className="text-xl">{formatTime(playTime)}</span>
@@ -1146,7 +1162,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           </div>
           <button
             onClick={onBack}
-            className="px-5 py-2.5 text-sm font-black text-orange-500 bg-orange-50 hover:bg-orange-100 rounded-full transition-colors border-2 border-orange-200 shadow-sm"
+            className="px-5 py-2.5 text-sm font-black text-orange-500 bg-orange-50 hover:bg-orange-100 rounded-full transition-colors border-2 border-orange-200 shadow-sm whitespace-nowrap"
           >
             Về trang chủ
           </button>
@@ -1305,24 +1321,9 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           <h2 className="text-3xl font-black text-center text-slate-800 mb-2 mt-4 sm:mt-0">
             Hành Trình Của Bé
           </h2>
-          <p className="text-center font-bold text-slate-500 mb-6">
+          <p className="text-center font-bold text-slate-500 mb-12">
             Hoàn thành các trò chơi để mở khóa chặng tiếp theo nhé!
           </p>
-          
-          <div className="max-w-md mx-auto mb-10 bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 shadow-sm">
-            <div className="flex justify-between items-end mb-2">
-              <span className="font-bold text-slate-600">Tiến độ hoàn thành:</span>
-              <span className="text-2xl font-black text-orange-500">
-                {levels.length > 0 ? Math.round((levels.filter(l => completedLevels[l.id]).length / levels.length) * 100) : 0}%
-              </span>
-            </div>
-            <div className="h-4 w-full bg-slate-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-orange-400 rounded-full transition-all duration-1000" 
-                style={{ width: `${levels.length > 0 ? Math.round((levels.filter(l => completedLevels[l.id]).length / levels.length) * 100) : 0}%` }} 
-              />
-            </div>
-          </div>
 
           <KidJourneyMap
             levels={levels}

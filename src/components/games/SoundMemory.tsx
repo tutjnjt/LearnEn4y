@@ -53,15 +53,18 @@ export default function SoundMemory({ cards, onWin }: SoundMemoryProps) {
   const speak = (text: string) => {
     try {
       if (!("speechSynthesis" in window)) return;
-      window.speechSynthesis.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
-      const voices = window.speechSynthesis.getVoices();
-      const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
-      if (enVoice) utterance.voice = enVoice;
-      utterance.rate = 0.9;
       
+      // On some Android devices, getVoices() might be empty initially, so we just use the default voice if none found.
+      const voices = window.speechSynthesis.getVoices();
+      if (voices && voices.length > 0) {
+        const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+        if (enVoice) utterance.voice = enVoice;
+      }
+      
+      utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
     } catch (e) {
       console.error("Speech synthesis failed:", e);

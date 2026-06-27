@@ -61,9 +61,29 @@ type Level =
 
 export function MomDashboard({ onBack }: { onBack: () => void }) {
   const [activeTab, setActiveTab] = useState<Tab>("roadmap");
+  const [showTest, setShowTest] = useState(false);
   const [currentLevel, setCurrentLevel] = useState<Level>(
     "Pre-IELTS (Band 3.0 - 4.0)",
   );
+
+  const stateRef = useRef({ showTest });
+  useEffect(() => {
+    stateRef.current = { showTest };
+  }, [showTest]);
+
+  useEffect(() => {
+    window.history.pushState({ isAppletLayer: true }, "");
+    const handlePopState = () => {
+      if (stateRef.current.showTest) {
+        setShowTest(false);
+        window.history.pushState({ isAppletLayer: true }, "");
+      } else {
+        onBack();
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [onBack]);
 
   // Mock Gamification state
   const [stats, setStats] = useState<UserStats>({
@@ -162,7 +182,7 @@ export function MomDashboard({ onBack }: { onBack: () => void }) {
       </div>
 
       <div className="min-h-[500px]">
-        {activeTab === "roadmap" && <MomRoadmap setActiveTab={setActiveTab} />}
+        {activeTab === "roadmap" && <MomRoadmap setActiveTab={setActiveTab} showTest={showTest} setShowTest={setShowTest} />}
         {activeTab === "practice" && (
           <MomPractice
             level={currentLevel}
@@ -234,9 +254,15 @@ import { MomDiagnosticTest } from "./MomDiagnosticTest";
 import { MomBeginnerReadingRoadmap } from "./MomBeginnerReadingRoadmap";
 
 // --- ROADMAP COMPONENT ---
-function MomRoadmap({ setActiveTab }: { setActiveTab: (tab: Tab) => void }) {
-  const [showTest, setShowTest] = useState(false);
-
+function MomRoadmap({ 
+  setActiveTab, 
+  showTest, 
+  setShowTest 
+}: { 
+  setActiveTab: (tab: Tab) => void;
+  showTest: boolean;
+  setShowTest: (v: boolean) => void;
+}) {
   if (showTest) {
     return <MomDiagnosticTest onBack={() => setShowTest(false)} />;
   }
@@ -445,7 +471,6 @@ function MomPractice({
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
-      window.speechSynthesis.cancel();
     };
   }, []);
 
@@ -500,14 +525,15 @@ function MomPractice({
   const speakText = (text: string) => {
     try {
       if (!("speechSynthesis" in window)) return;
-      window.speechSynthesis.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
       utterance.rate = listeningSpeed;
       const voices = window.speechSynthesis.getVoices();
-      const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
-      if (enVoice) utterance.voice = enVoice;
+      if (voices && voices.length > 0) {
+        const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+        if (enVoice) utterance.voice = enVoice;
+      }
       
       window.speechSynthesis.speak(utterance);
     } catch (e) {
@@ -516,9 +542,7 @@ function MomPractice({
   };
 
   const stopSpeaking = () => {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-    }
+    // Left empty because cancel() is broken on some Android devices
   };
 
   const toggleRecording = () => {
@@ -1524,13 +1548,14 @@ function Flashcards({
   const speakText = (text: string) => {
     try {
       if (!("speechSynthesis" in window)) return;
-      window.speechSynthesis.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
       const voices = window.speechSynthesis.getVoices();
-      const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
-      if (enVoice) utterance.voice = enVoice;
+      if (voices && voices.length > 0) {
+        const enVoice = voices.find(v => v.lang.replace('_', '-').startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+        if (enVoice) utterance.voice = enVoice;
+      }
       utterance.rate = 0.9;
       
       window.speechSynthesis.speak(utterance);
