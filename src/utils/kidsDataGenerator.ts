@@ -2,54 +2,64 @@ export const IPA_DATA: Record<string, { word: string; vi: string; emoji: string;
   ipa_stage_1: [
     { word: "Sheep", vi: "Con cừu", emoji: "🐑", ipa: "/ʃiːp/" },
     { word: "Ship", vi: "Tàu thủy", emoji: "🚢", ipa: "/ʃɪp/" },
-    { word: "Good", vi: "Tốt", emoji: "👍", ipa: "/gʊd/" },
     { word: "Food", vi: "Thức ăn", emoji: "🍔", ipa: "/fuːd/" },
+    { word: "Good", vi: "Tốt", emoji: "👍", ipa: "/gʊd/" },
     { word: "See", vi: "Nhìn", emoji: "👀", ipa: "/siː/" },
     { word: "Sit", vi: "Ngồi", emoji: "🪑", ipa: "/sɪt/" },
-    { word: "Look", vi: "Nhìn", emoji: "👀", ipa: "/lʊk/" },
     { word: "Moon", vi: "Mặt trăng", emoji: "🌙", ipa: "/muːn/" },
+    { word: "Look", vi: "Nhìn", emoji: "👀", ipa: "/lʊk/" },
   ],
   ipa_stage_2: [
-    { word: "Bed", vi: "Cái giường", emoji: "🛏️", ipa: "/bed/" },
-    { word: "Teacher", vi: "Giáo viên", emoji: "👩‍🏫", ipa: "/ˈtiːtʃə/" },
-    { word: "Bird", vi: "Con chim", emoji: "🐦", ipa: "/bɜːd/" },
-    { word: "Door", vi: "Cửa", emoji: "🚪", ipa: "/dɔː/" },
-    { word: "Red", vi: "Màu đỏ", emoji: "🔴", ipa: "/red/" },
-    { word: "Mother", vi: "Mẹ", emoji: "👩", ipa: "/ˈmʌðə/" },
-    { word: "Girl", vi: "Cô gái", emoji: "👧", ipa: "/gɜːl/" },
-    { word: "Four", vi: "Số bốn", emoji: "4️⃣", ipa: "/fɔː/" },
-  ],
-  ipa_stage_3: [
+    { word: "Bed", vi: "Giường", emoji: "🛏️", ipa: "/bed/" },
     { word: "Cat", vi: "Con mèo", emoji: "🐱", ipa: "/kæt/" },
     { word: "Cup", vi: "Cái cốc", emoji: "☕", ipa: "/kʌp/" },
     { word: "Car", vi: "Ô tô", emoji: "🚗", ipa: "/kɑː/" },
-    { word: "Dog", vi: "Con chó", emoji: "🐶", ipa: "/dɒg/" },
+    { word: "Pen", vi: "Cái bút", emoji: "🖊️", ipa: "/pen/" },
     { word: "Hat", vi: "Cái mũ", emoji: "👒", ipa: "/hæt/" },
     { word: "Sun", vi: "Mặt trời", emoji: "☀️", ipa: "/sʌn/" },
     { word: "Star", vi: "Ngôi sao", emoji: "⭐", ipa: "/stɑː/" },
+  ],
+  ipa_stage_3: [
+    { word: "Dog", vi: "Con chó", emoji: "🐶", ipa: "/dɒg/" },
+    { word: "Door", vi: "Cửa", emoji: "🚪", ipa: "/dɔː/" },
+    { word: "Mother", vi: "Mẹ", emoji: "👩", ipa: "/ˈmʌðə/" },
+    { word: "Bird", vi: "Con chim", emoji: "🐦", ipa: "/bɜːd/" },
     { word: "Hot", vi: "Nóng", emoji: "🔥", ipa: "/hɒt/" },
+    { word: "Four", vi: "Số bốn", emoji: "4️⃣", ipa: "/fɔː/" },
+    { word: "Teacher", vi: "Giáo viên", emoji: "👩‍🏫", ipa: "/ˈtiːtʃə/" },
+    { word: "Girl", vi: "Cô gái", emoji: "👧", ipa: "/gɜːl/" },
   ],
   ipa_stage_4: [
     { word: "Ear", vi: "Tai", emoji: "👂", ipa: "/ɪə/" },
     { word: "Hair", vi: "Tóc", emoji: "💇", ipa: "/heə/" },
     { word: "Tourist", vi: "Du khách", emoji: "🎒", ipa: "/ˈtʊərɪst/" },
-    { word: "Wait", vi: "Đợi", emoji: "⏳", ipa: "/weɪt/" },
     { word: "Near", vi: "Gần", emoji: "📍", ipa: "/nɪə/" },
     { word: "Bear", vi: "Con gấu", emoji: "🐻", ipa: "/beə/" },
     { word: "Sure", vi: "Chắc chắn", emoji: "✅", ipa: "/ʃʊə/" },
-    { word: "Day", vi: "Ngày", emoji: "☀️", ipa: "/deɪ/" },
+    { word: "Clear", vi: "Rõ ràng", emoji: "✨", ipa: "/klɪə/" },
+    { word: "Chair", vi: "Cái ghế", emoji: "🪑", ipa: "/tʃeə/" },
   ],
   ipa_stage_5: [
-    { word: "Boy", vi: "Cậu bé", emoji: "👦", ipa: "/bɔɪ/" },
-    { word: "My", vi: "Của tôi", emoji: "🙋‍♂️", ipa: "/maɪ/" },
-    { word: "Show", vi: "Trình diễn", emoji: "🎭", ipa: "/ʃəʊ/" },
-    { word: "Cow", vi: "Con bò", emoji: "🐮", ipa: "/kaʊ/" },
-    { word: "Toy", vi: "Đồ chơi", emoji: "🧸", ipa: "/tɔɪ/" },
+    { word: "Day", vi: "Ngày", emoji: "☀️", ipa: "/deɪ/" },
     { word: "Eye", vi: "Mắt", emoji: "👁️", ipa: "/aɪ/" },
-    { word: "Boat", vi: "Thuyền", emoji: "⛵", ipa: "/bəʊt/" },
-    { word: "House", vi: "Ngôi nhà", emoji: "🏠", ipa: "/haʊs/" },
+    { word: "Boy", vi: "Cậu bé", emoji: "👦", ipa: "/bɔɪ/" },
+    { word: "Wait", vi: "Đợi", emoji: "⏳", ipa: "/weɪt/" },
+    { word: "Time", vi: "Thời gian", emoji: "⏰", ipa: "/taɪm/" },
+    { word: "Toy", vi: "Đồ chơi", emoji: "🧸", ipa: "/tɔɪ/" },
+    { word: "Face", vi: "Khuôn mặt", emoji: "😊", ipa: "/feɪs/" },
+    { word: "My", vi: "Của tôi", emoji: "🙋‍♂️", ipa: "/maɪ/" },
   ],
   ipa_stage_6: [
+    { word: "Show", vi: "Trình diễn", emoji: "🎭", ipa: "/ʃəʊ/" },
+    { word: "Cow", vi: "Con bò", emoji: "🐮", ipa: "/kaʊ/" },
+    { word: "Boat", vi: "Thuyền", emoji: "⛵", ipa: "/bəʊt/" },
+    { word: "House", vi: "Ngôi nhà", emoji: "🏠", ipa: "/haʊs/" },
+    { word: "Nose", vi: "Mũi", emoji: "👃", ipa: "/nəʊz/" },
+    { word: "Mouse", vi: "Con chuột", emoji: "🐭", ipa: "/maʊs/" },
+    { word: "Go", vi: "Đi", emoji: "🚶", ipa: "/gəʊ/" },
+    { word: "Mouth", vi: "Miệng", emoji: "👄", ipa: "/maʊθ/" },
+  ],
+  ipa_stage_7: [
     { word: "Pig", vi: "Con lợn", emoji: "🐷", ipa: "/pɪg/" },
     { word: "Bed", vi: "Giường", emoji: "🛏️", ipa: "/bed/" },
     { word: "Time", vi: "Thời gian", emoji: "⏰", ipa: "/taɪm/" },
@@ -59,7 +69,7 @@ export const IPA_DATA: Record<string, { word: string; vi: string; emoji: string;
     { word: "Tree", vi: "Cây", emoji: "🌳", ipa: "/triː/" },
     { word: "Door", vi: "Cửa", emoji: "🚪", ipa: "/dɔː/" },
   ],
-  ipa_stage_7: [
+  ipa_stage_8: [
     { word: "Cat", vi: "Con mèo", emoji: "🐱", ipa: "/kæt/" },
     { word: "Go", vi: "Đi", emoji: "🚶", ipa: "/gəʊ/" },
     { word: "Five", vi: "Số năm", emoji: "5️⃣", ipa: "/faɪv/" },
@@ -69,7 +79,7 @@ export const IPA_DATA: Record<string, { word: string; vi: string; emoji: string;
     { word: "Fish", vi: "Con cá", emoji: "🐟", ipa: "/fɪʃ/" },
     { word: "Vest", vi: "Áo ghi lê", emoji: "🦺", ipa: "/vest/" },
   ],
-  ipa_stage_8: [
+  ipa_stage_9: [
     { word: "Three", vi: "Số ba", emoji: "3️⃣", ipa: "/θriː/" },
     { word: "This", vi: "Cái này", emoji: "👇", ipa: "/ðɪs/" },
     { word: "Sun", vi: "Mặt trời", emoji: "☀️", ipa: "/sʌn/" },
@@ -79,7 +89,7 @@ export const IPA_DATA: Record<string, { word: string; vi: string; emoji: string;
     { word: "Six", vi: "Số sáu", emoji: "6️⃣", ipa: "/sɪks/" },
     { word: "Zero", vi: "Số không", emoji: "0️⃣", ipa: "/ˈzɪərəʊ/" },
   ],
-  ipa_stage_9: [
+  ipa_stage_10: [
     { word: "Shoe", vi: "Giày", emoji: "👞", ipa: "/ʃuː/" },
     { word: "Television", vi: "Ti vi", emoji: "📺", ipa: "/ˈtelɪvɪʒn/" },
     { word: "Chair", vi: "Cái ghế", emoji: "🪑", ipa: "/tʃeə/" },
@@ -89,7 +99,7 @@ export const IPA_DATA: Record<string, { word: string; vi: string; emoji: string;
     { word: "Cheese", vi: "Phô mai", emoji: "🧀", ipa: "/tʃiːz/" },
     { word: "Jam", vi: "Mứt", emoji: "🍓", ipa: "/dʒæm/" },
   ],
-  ipa_stage_10: [
+  ipa_stage_11: [
     { word: "Man", vi: "Đàn ông", emoji: "👨", ipa: "/mæn/" },
     { word: "Nine", vi: "Số chín", emoji: "9️⃣", ipa: "/naɪn/" },
     { word: "Sing", vi: "Hát", emoji: "🎤", ipa: "/sɪŋ/" },
@@ -99,7 +109,7 @@ export const IPA_DATA: Record<string, { word: string; vi: string; emoji: string;
     { word: "Ring", vi: "Nhẫn", emoji: "💍", ipa: "/rɪŋ/" },
     { word: "Hand", vi: "Bàn tay", emoji: "🖐️", ipa: "/hænd/" },
   ],
-  ipa_stage_11: [
+  ipa_stage_12: [
     { word: "Leg", vi: "Cái chân", emoji: "🦵", ipa: "/leg/" },
     { word: "Red", vi: "Màu đỏ", emoji: "🔴", ipa: "/red/" },
     { word: "Wet", vi: "Ướt", emoji: "💧", ipa: "/wet/" },
@@ -109,7 +119,7 @@ export const IPA_DATA: Record<string, { word: string; vi: string; emoji: string;
     { word: "Window", vi: "Cửa sổ", emoji: "🪟", ipa: "/ˈwɪndəʊ/" },
     { word: "Yellow", vi: "Màu vàng", emoji: "🟡", ipa: "/ˈjeləʊ/" },
   ],
-  ipa_stage_12: [
+  ipa_stage_13: [
     { word: "Happy", vi: "Vui vẻ", emoji: "😁", ipa: "/ˈhæpi/" },
     { word: "Sunny", vi: "Trời nắng", emoji: "☀️", ipa: "/ˈsʌni/" },
     { word: "Tiger", vi: "Con hổ", emoji: "🐯", ipa: "/ˈtaɪgər/" },
@@ -471,16 +481,17 @@ export function generateKidsData(
   if (type === "ipa_symbol_reading") {
     let symbols = ["/i:/", "/ɪ/", "/u:/", "/ʊ/"];
     if (level === "ipa_stage_1") symbols = ["/i:/", "/ɪ/", "/u:/", "/ʊ/"];
-    else if (level === "ipa_stage_2") symbols = ["/e/", "/ə/", "/ɜ:/", "/ɔ:/"];
-    else if (level === "ipa_stage_3") symbols = ["/æ/", "/ʌ/", "/ɑ:/", "/ɒ/"];
-    else if (level === "ipa_stage_4") symbols = ["/ɪə/", "/eə/", "/ʊə/", "/eɪ/"];
-    else if (level === "ipa_stage_5") symbols = ["/ɔɪ/", "/aɪ/", "/əʊ/", "/aʊ/"];
-    else if (level === "ipa_stage_6") symbols = ["/p/", "/b/", "/t/", "/d/"];
-    else if (level === "ipa_stage_7") symbols = ["/k/", "/g/", "/f/", "/v/"];
-    else if (level === "ipa_stage_8") symbols = ["/θ/", "/ð/", "/s/", "/z/"];
-    else if (level === "ipa_stage_9") symbols = ["/ʃ/", "/ʒ/", "/tʃ/", "/dʒ/"];
-    else if (level === "ipa_stage_10") symbols = ["/m/", "/n/", "/ŋ/", "/h/"];
-    else if (level === "ipa_stage_11") symbols = ["/l/", "/r/", "/w/", "/j/"];
+    else if (level === "ipa_stage_2") symbols = ["/e/", "/æ/", "/ʌ/", "/ɑ:/"];
+    else if (level === "ipa_stage_3") symbols = ["/ɒ/", "/ɔ:/", "/ə/", "/ɜ:/"];
+    else if (level === "ipa_stage_4") symbols = ["/ɪə/", "/eə/", "/ʊə/"];
+    else if (level === "ipa_stage_5") symbols = ["/eɪ/", "/aɪ/", "/ɔɪ/"];
+    else if (level === "ipa_stage_6") symbols = ["/əʊ/", "/aʊ/"];
+    else if (level === "ipa_stage_7") symbols = ["/p/", "/b/", "/t/", "/d/"];
+    else if (level === "ipa_stage_8") symbols = ["/k/", "/g/", "/f/", "/v/"];
+    else if (level === "ipa_stage_9") symbols = ["/θ/", "/ð/", "/s/", "/z/"];
+    else if (level === "ipa_stage_10") symbols = ["/ʃ/", "/ʒ/", "/tʃ/", "/dʒ/"];
+    else if (level === "ipa_stage_11") symbols = ["/m/", "/n/", "/ŋ/", "/h/"];
+    else if (level === "ipa_stage_12") symbols = ["/l/", "/r/", "/w/", "/j/"];
     else symbols = ["/i:/", "/ɪ/", "/e/", "/æ/", "/ʌ/", "/ɑ:/", "/ʊ/", "/u:/"].sort(() => 0.5 - Math.random()).slice(0, 4);
 
     return {

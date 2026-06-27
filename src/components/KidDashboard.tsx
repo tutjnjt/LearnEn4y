@@ -18,6 +18,7 @@ import {
   FileText,
   Sparkles,
   Play,
+  X,
 } from "lucide-react";
 import { KidFlashcard } from "../types";
 import { KidMemoryMatrix } from "./KidMemoryMatrix";
@@ -33,22 +34,90 @@ import { speak } from "../utils/audio";
 
 export function KidDashboard({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState<string | null>(null);
-  const [view, setView] = useState<"home" | "ipa_map" | "ipa_menu" | "books" | "volumes" | "map" | "menu">("home");
+  const [view, setView] = useState<"home" | "ipa_chart" | "ipa_map" | "ipa_menu" | "books" | "volumes" | "map" | "menu">("home");
   const [ipaLevel, setIpaLevel] = useState("ipa_stage_1");
+  const [selectedIpaSymbol, setSelectedIpaSymbol] = useState<string | null>(null);
+  const selectedSymbolRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedIpaSymbol && selectedSymbolRef.current) {
+      selectedSymbolRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [selectedIpaSymbol]);
+
+  const ipaChartData = {
+    vowels: [
+      { symbol: "i:", word: "sheep", type: "spread", emoji: "😁", desc: "Môi bè ra hai bên như đang mỉm cười, miệng mở hẹp." },
+      { symbol: "ɪ", word: "ship", type: "spread", emoji: "😁", desc: "Mở miệng rộng hơn /i:/ một chút, âm phát ra ngắn." },
+      { symbol: "ʊ", word: "good", type: "round", emoji: "😗", desc: "Môi hơi tròn và mở hẹp, lưỡi đưa về phía sau." },
+      { symbol: "u:", word: "moon", type: "round", emoji: "😗", desc: "Môi chu tròn ra phía trước, lưỡi nâng cao ở phía sau." },
+      { symbol: "e", word: "bed", type: "spread", emoji: "😮", desc: "Mở miệng vừa phải, lưỡi đặt thấp." },
+      { symbol: "ə", word: "teacher", type: "neutral", emoji: "😐", desc: "Mở miệng tự nhiên, âm phát ra rất nhẹ và ngắn." },
+      { symbol: "ɜ:", word: "bird", type: "neutral", emoji: "😐", desc: "Môi hơi mở, lưỡi nâng cao, âm kéo dài." },
+      { symbol: "ɔ:", word: "door", type: "round", emoji: "😦", desc: "Môi tròn, mở rộng vừa phải, âm kéo dài." },
+      { symbol: "æ", word: "cat", type: "wide", emoji: "😮‍💨", desc: "Miệng mở rộng hết cỡ (nửa a nửa e), lưỡi đặt thấp." },
+      { symbol: "ʌ", word: "up", type: "wide", emoji: "😮", desc: "Miệng mở rộng vừa phải, phát âm dứt khoát." },
+      { symbol: "ɑ:", word: "car", type: "wide", emoji: "😮‍💨", desc: "Miệng mở to, lưỡi hạ thấp, âm kéo dài." },
+      { symbol: "ɒ", word: "dog", type: "round", emoji: "😦", desc: "Miệng mở rộng, môi hơi tròn, phát âm ngắn." }
+    ],
+    diphthongs: [
+      { symbol: "ɪə", word: "ear", type: "diphthong", emoji: "🗣️", desc: "Trượt từ /ɪ/ sang /ə/." },
+      { symbol: "eɪ", word: "train", type: "diphthong", emoji: "🗣️", desc: "Trượt từ /e/ sang /ɪ/." },
+      { symbol: "ʊə", word: "tourist", type: "diphthong", emoji: "🗣️", desc: "Trượt từ /ʊ/ sang /ə/." },
+      { symbol: "ɔɪ", word: "boy", type: "diphthong", emoji: "🗣️", desc: "Trượt từ /ɔ/ sang /ɪ/." },
+      { symbol: "əʊ", word: "show", type: "diphthong", emoji: "🗣️", desc: "Trượt từ /ə/ sang /ʊ/." },
+      { symbol: "eə", word: "hair", type: "diphthong", emoji: "🗣️", desc: "Trượt từ /e/ sang /ə/." },
+      { symbol: "aɪ", word: "eye", type: "diphthong", emoji: "🗣️", desc: "Trượt từ /a/ sang /ɪ/." },
+      { symbol: "aʊ", word: "cow", type: "diphthong", emoji: "🗣️", desc: "Trượt từ /a/ sang /ʊ/." }
+    ],
+    consonants: [
+      { symbol: "p", word: "pen", type: "unvoiced", emoji: "👄", desc: "Hai môi mím lại rồi bật hơi ra ngoài (không rung cổ họng)." },
+      { symbol: "b", word: "bed", type: "voiced", emoji: "👄", desc: "Hai môi mím lại rồi bật ra (rung dây thanh)." },
+      { symbol: "t", word: "time", type: "unvoiced", emoji: "👅", desc: "Đầu lưỡi chạm ngạc cứng trên, bật hơi." },
+      { symbol: "d", word: "door", type: "voiced", emoji: "👅", desc: "Đầu lưỡi chạm ngạc cứng trên, rung dây thanh." },
+      { symbol: "tʃ", word: "chair", type: "unvoiced", emoji: "🤫", desc: "Môi hơi chu ra, bật hơi mạnh giống chữ 'ch' nhưng bật hơi." },
+      { symbol: "dʒ", word: "jam", type: "voiced", emoji: "🤫", desc: "Giống /tʃ/ nhưng rung dây thanh." },
+      { symbol: "k", word: "cat", type: "unvoiced", emoji: "😮", desc: "Cuống lưỡi chạm ngạc mềm, bật hơi." },
+      { symbol: "g", word: "go", type: "voiced", emoji: "😮", desc: "Cuống lưỡi chạm ngạc mềm, rung thanh quản." },
+      { symbol: "f", word: "fish", type: "unvoiced", emoji: "😬", desc: "Răng trên chạm môi dưới, thổi hơi." },
+      { symbol: "v", word: "vest", type: "voiced", emoji: "😬", desc: "Răng trên chạm môi dưới, rung dây thanh." },
+      { symbol: "θ", word: "three", type: "unvoiced", emoji: "👅", desc: "Đặt lưỡi giữa hai hàm răng, thổi luồng hơi ra, cổ họng không rung." },
+      { symbol: "ð", word: "this", type: "voiced", emoji: "👅", desc: "Đặt lưỡi giữa hai hàm răng, phát âm và rung mạnh ở cổ họng." },
+      { symbol: "s", word: "sun", type: "unvoiced", emoji: "😬", desc: "Hai hàm răng gần khép lại, thổi hơi ra." },
+      { symbol: "z", word: "zero", type: "voiced", emoji: "😬", desc: "Giống /s/ nhưng rung dây thanh." },
+      { symbol: "ʃ", word: "shoe", type: "unvoiced", emoji: "🤫", desc: "Môi chu tròn ra phía trước, thổi hơi mạnh." },
+      { symbol: "ʒ", word: "television", type: "voiced", emoji: "🤫", desc: "Giống /ʃ/ nhưng rung dây thanh." },
+      { symbol: "m", word: "man", type: "voiced", emoji: "👄", desc: "Hai môi mím lại, âm thoát ra đường mũi." },
+      { symbol: "n", word: "nine", type: "voiced", emoji: "👅", desc: "Đầu lưỡi chạm ngạc cứng trên, âm thoát mũi." },
+      { symbol: "ŋ", word: "sing", type: "voiced", emoji: "👅", desc: "Cuống lưỡi chạm ngạc mềm, âm thoát mũi." },
+      { symbol: "h", word: "hat", type: "unvoiced", emoji: "😮", desc: "Mở miệng tự nhiên, đẩy hơi nhẹ ra." },
+      { symbol: "l", word: "leg", type: "voiced", emoji: "👅", desc: "Đầu lưỡi chạm răng trên, bật xuống." },
+      { symbol: "r", word: "red", type: "voiced", emoji: "👅", desc: "Lưỡi cong lên nhưng không chạm vòm miệng." },
+      { symbol: "w", word: "window", type: "voiced", emoji: "😗", desc: "Môi tròn, hơi chu ra trước." },
+      { symbol: "j", word: "yellow", type: "voiced", emoji: "😁", desc: "Môi hơi bè, lưỡi nâng cao." }
+    ]
+  };
+
+  const getSymbolData = (symbol: string) => {
+    return ipaChartData.vowels.find(v => v.symbol === symbol) 
+        || ipaChartData.diphthongs.find(d => d.symbol === symbol)
+        || ipaChartData.consonants.find(c => c.symbol === symbol);
+  };
 
   const ipaLevels = [
-    { id: "ipa_stage_1", name: "Nguyên âm 1 (/i:/, /ɪ/, /ʊ/, /u:/)", emoji: "👄" },
-    { id: "ipa_stage_2", name: "Nguyên âm 2 (/e/, /ə/, /ɜ:/, /ɔ:/)", emoji: "👄" },
-    { id: "ipa_stage_3", name: "Nguyên âm 3 (/æ/, /ʌ/, /ɑ:/, /ɒ/)", emoji: "👄" },
-    { id: "ipa_stage_4", name: "Nguyên âm đôi 1 (/ɪə/, /eə/, /ʊə/, /eɪ/)", emoji: "🗣️" },
-    { id: "ipa_stage_5", name: "Nguyên âm đôi 2 (/ɔɪ/, /aɪ/, /əʊ/, /aʊ/)", emoji: "🗣️" },
-    { id: "ipa_stage_6", name: "Phụ âm 1 (/p/, /b/, /t/, /d/)", emoji: "🦷" },
-    { id: "ipa_stage_7", name: "Phụ âm 2 (/k/, /g/, /f/, /v/)", emoji: "🦷" },
-    { id: "ipa_stage_8", name: "Phụ âm 3 (/θ/, /ð/, /s/, /z/)", emoji: "🦷" },
-    { id: "ipa_stage_9", name: "Phụ âm 4 (/ʃ/, /ʒ/, /tʃ/, /dʒ/)", emoji: "🦷" },
-    { id: "ipa_stage_10", name: "Phụ âm 5 (/m/, /n/, /ŋ/, /h/)", emoji: "🦷" },
-    { id: "ipa_stage_11", name: "Phụ âm 6 (/l/, /r/, /w/, /j/)", emoji: "🦷" },
-    { id: "ipa_stage_12", name: "Ghép vần & Đọc từ", emoji: "📖" },
+    { id: "ipa_stage_1", name: "Nguyên âm: /i:/, /ɪ/, /u:/, /ʊ/", emoji: "👄" },
+    { id: "ipa_stage_2", name: "Nguyên âm: /e/, /æ/, /ʌ/, /ɑ:/", emoji: "👄" },
+    { id: "ipa_stage_3", name: "Nguyên âm: /ɒ/, /ɔ:/, /ə/, /ɜ:/", emoji: "👄" },
+    { id: "ipa_stage_4", name: "Nguyên âm đôi: /ɪə/, /eə/, /ʊə/", emoji: "🗣️" },
+    { id: "ipa_stage_5", name: "Nguyên âm đôi: /eɪ/, /aɪ/, /ɔɪ/", emoji: "🗣️" },
+    { id: "ipa_stage_6", name: "Nguyên âm đôi: /əʊ/, /aʊ/", emoji: "🗣️" },
+    { id: "ipa_stage_7", name: "Phụ âm 1: /p/, /b/, /t/, /d/", emoji: "🦷" },
+    { id: "ipa_stage_8", name: "Phụ âm 2: /k/, /g/, /f/, /v/", emoji: "🦷" },
+    { id: "ipa_stage_9", name: "Phụ âm 3: /θ/, /ð/, /s/, /z/", emoji: "🦷" },
+    { id: "ipa_stage_10", name: "Phụ âm 4: /ʃ/, /ʒ/, /tʃ/, /dʒ/", emoji: "🦷" },
+    { id: "ipa_stage_11", name: "Phụ âm 5: /m/, /n/, /ŋ/, /h/", emoji: "🦷" },
+    { id: "ipa_stage_12", name: "Phụ âm 6: /l/, /r/, /w/, /j/", emoji: "🦷" },
+    { id: "ipa_stage_13", name: "Ghép vần & Đọc từ", emoji: "📖" },
   ];
 
   const speakWord = (word: string) => {
@@ -182,8 +251,11 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
       } else if (s.view === "volumes") {
         setView("books");
         window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
-      } else if (s.view === "books" || s.view === "ipa_map") {
+      } else if (s.view === "books" || s.view === "ipa_chart") {
         setView("home");
+        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
+      } else if (s.view === "ipa_map") {
+        setView("ipa_chart");
         window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else if (s.view === "ipa_menu") {
         setView("ipa_map");
@@ -1246,7 +1318,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
             <button
-              onClick={() => setView("ipa_map")}
+              onClick={() => setView("ipa_chart")}
               className="flex flex-col items-center justify-center p-8 bg-purple-50 border-4 border-purple-200 rounded-3xl shadow-sm hover:border-purple-400 hover:-translate-y-2 transition-all group"
             >
               <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-5xl mb-4 group-hover:scale-110 transition-transform shadow-sm border-4 border-purple-100">
@@ -1413,6 +1485,153 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
+      {/* IPA Chart View */}
+      {view === "ipa_chart" && (
+        <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative animate-in fade-in slide-in-from-bottom-4">
+          <div className="absolute top-4 left-4">
+            <button
+              onClick={() => setView("home")}
+              className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-500 transition-colors bg-white px-4 py-3 rounded-2xl border-4 border-slate-100 shadow-sm hover:shadow-md"
+            >
+              <ArrowLeft className="w-5 h-5" /> Trang chủ
+            </button>
+          </div>
+
+          <div className="text-center mb-8 pt-12">
+            <h2 className="text-3xl font-black text-purple-600 mb-4 flex items-center justify-center gap-2">
+              <Sparkles className="text-yellow-400" />
+              Bảng Phiên Âm Tiếng Anh (IPA)
+              <Sparkles className="text-yellow-400" />
+            </h2>
+            <p className="text-slate-500 text-lg">Bấm vào từng âm để xem khẩu hình miệng và nghe cách đọc nhé!</p>
+          </div>
+
+          {selectedIpaSymbol && (
+            <div ref={selectedSymbolRef} className="bg-purple-50 border-4 border-purple-200 rounded-3xl p-6 mb-8 shadow-sm flex flex-col items-center justify-center relative animate-in slide-in-from-top-4 text-center max-w-2xl mx-auto">
+              <h3 className="text-4xl font-black text-purple-700 mb-2">/{selectedIpaSymbol}/</h3>
+              <p className="text-purple-900 font-bold text-xl mb-6">
+                {getSymbolData(selectedIpaSymbol)?.desc}
+              </p>
+              
+              <div className="w-40 h-40 bg-white rounded-3xl border-4 border-purple-100 shadow-sm flex items-center justify-center text-8xl mb-6">
+                {getSymbolData(selectedIpaSymbol)?.emoji}
+              </div>
+
+              <div className="flex flex-col items-center gap-4">
+                <button 
+                  onClick={() => speakWord(getSymbolData(selectedIpaSymbol)?.word || "")}
+                  className="p-4 bg-purple-600 text-white rounded-full hover:bg-purple-700 hover:scale-110 transition-all shadow-md flex items-center justify-center"
+                >
+                  <Volume2 className="w-8 h-8" />
+                </button>
+                <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl border-2 border-purple-100 text-purple-600 font-bold">
+                  Ví dụ: {getSymbolData(selectedIpaSymbol)?.word}
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setSelectedIpaSymbol(null)}
+                className="absolute top-4 right-4 p-2 text-purple-400 hover:text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-4 overflow-x-auto pb-4">
+            <div className="flex gap-4 min-w-max">
+              {/* Vowels */}
+              <div className="flex flex-col gap-2">
+                <div className="bg-yellow-100 text-yellow-800 font-bold py-2 px-4 rounded-xl text-center border-2 border-yellow-200">
+                  Nguyên âm đơn (Monophthongs)
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {ipaChartData.vowels.map((v) => (
+                    <button
+                      key={v.symbol}
+                      onClick={() => setSelectedIpaSymbol(v.symbol)}
+                      className={`p-4 rounded-xl border-2 transition-all hover:scale-105 hover:shadow-md flex flex-col items-center justify-center min-w-[80px] min-h-[80px]
+                        ${selectedIpaSymbol === v.symbol 
+                          ? 'bg-yellow-200 border-yellow-400 scale-105 shadow-md' 
+                          : 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100'}`}
+                    >
+                      <span className="text-2xl font-black text-slate-800 mb-1">/{v.symbol}/</span>
+                      <span className="text-sm text-slate-500 font-medium">{v.word}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Diphthongs */}
+              <div className="flex flex-col gap-2">
+                <div className="bg-orange-100 text-orange-800 font-bold py-2 px-4 rounded-xl text-center border-2 border-orange-200">
+                  Nguyên âm đôi (Diphthongs)
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {ipaChartData.diphthongs.map((v) => (
+                    <button
+                      key={v.symbol}
+                      onClick={() => setSelectedIpaSymbol(v.symbol)}
+                      className={`p-4 rounded-xl border-2 transition-all hover:scale-105 hover:shadow-md flex flex-col items-center justify-center min-w-[80px] min-h-[80px]
+                        ${selectedIpaSymbol === v.symbol 
+                          ? 'bg-orange-200 border-orange-400 scale-105 shadow-md' 
+                          : 'bg-orange-50 border-orange-200 hover:bg-orange-100'}`}
+                    >
+                      <span className="text-2xl font-black text-slate-800 mb-1">/{v.symbol}/</span>
+                      <span className="text-sm text-slate-500 font-medium">{v.word}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Consonants */}
+            <div className="flex flex-col gap-2 mt-4">
+              <div className="bg-blue-100 text-blue-800 font-bold py-2 px-4 rounded-xl text-center border-2 border-blue-200">
+                Phụ âm (Consonants)
+              </div>
+              <div className="grid grid-cols-8 gap-2 min-w-max">
+                {ipaChartData.consonants.map((v) => (
+                  <button
+                    key={v.symbol}
+                    onClick={() => setSelectedIpaSymbol(v.symbol)}
+                    className={`p-4 rounded-xl border-2 transition-all hover:scale-105 hover:shadow-md flex flex-col items-center justify-center min-w-[80px] min-h-[80px]
+                      ${selectedIpaSymbol === v.symbol 
+                        ? (v.type === 'voiced' ? 'bg-indigo-200 border-indigo-400' : 'bg-sky-200 border-sky-400') + ' scale-105 shadow-md' 
+                        : (v.type === 'voiced' ? 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100' : 'bg-sky-50 border-sky-200 hover:bg-sky-100')}`}
+                  >
+                    <span className="text-2xl font-black text-slate-800 mb-1">/{v.symbol}/</span>
+                    <span className="text-sm text-slate-500 font-medium">{v.word}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-center gap-8 mt-2 text-sm font-medium text-slate-500">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-sky-100 border border-sky-200"></div>
+                  Vô thanh (Unvoiced)
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-indigo-100 border border-indigo-200"></div>
+                  Hữu thanh (Voiced)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-12">
+            <button
+              onClick={() => {
+                setView("ipa_map");
+                window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
+              }}
+              className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold text-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3 group"
+            >
+              Vào chơi thôi! <Play className="w-6 h-6 group-hover:scale-110 transition-transform fill-current" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* IPA Map View */}
       {view === "ipa_map" && !gameMode && (
         <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative">
@@ -1497,12 +1716,12 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
               <BookOpen className="w-8 h-8" /> Lý Thuyết: {ipaLevels.find(l => l.id === ipaLevel)?.name}
             </h3>
             <p className="text-blue-900 font-medium mb-6 text-lg">
-              {ipaLevel === "ipa_stage_12" 
+              {ipaLevel === "ipa_stage_13" 
                 ? "Khi đã nắm vững các âm, bé có thể nhìn phiên âm để tự ghép vần và đọc mọi từ tiếng Anh."
                 : "Hãy nghe và quan sát các từ vựng đại diện cho các âm này:"}
             </p>
             
-            {ipaLevel === "ipa_stage_12" ? (
+            {ipaLevel === "ipa_stage_13" ? (
               <div className="bg-white rounded-2xl p-6 border-2 border-blue-100 space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="bg-blue-100 text-blue-600 p-3 rounded-full">
