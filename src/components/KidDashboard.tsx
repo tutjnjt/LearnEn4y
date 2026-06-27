@@ -123,15 +123,15 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   const speakWord = (word: string) => {
     if (word.startsWith("/") && word.endsWith("/")) {
       const ipaMap: Record<string, string> = {
-        "/i:/": "ee", "/ɪ/": "ih", "/e/": "eh", "/æ/": "ah", "/ʌ/": "uh",
-        "/ɑ:/": "ah", "/ɒ/": "o", "/ɔ:/": "aw", "/ʊ/": "uh", "/u:/": "oo",
+        "/i:/": "ee", "/ɪ/": "ih", "/e/": "eh", "/æ/": "a", "/ʌ/": "uh",
+        "/ɑ:/": "ar", "/ɒ/": "o", "/ɔ:/": "or", "/ʊ/": "uuh", "/u:/": "oo",
         "/ɜ:/": "er", "/ə/": "uh", "/eɪ/": "ay", "/aɪ/": "eye", "/ɔɪ/": "oy",
         "/əʊ/": "oh", "/aʊ/": "ow", "/ɪə/": "ear", "/eə/": "air", "/ʊə/": "oor",
         "/p/": "puh", "/b/": "buh", "/t/": "tuh", "/d/": "duh", "/k/": "kuh",
-        "/g/": "guh", "/f/": "fuh", "/v/": "vuh", "/θ/": "th", "/ð/": "th",
-        "/s/": "ss", "/z/": "zz", "/ʃ/": "sh", "/ʒ/": "zh", "/m/": "mm",
-        "/n/": "nn", "/ŋ/": "ng", "/h/": "huh", "/l/": "ll", "/r/": "ruh",
-        "/j/": "yuh", "/w/": "wuh", "/tʃ/": "ch", "/dʒ/": "juh"
+        "/g/": "guh", "/f/": "fuh", "/v/": "vuh", "/θ/": "thuh", "/ð/": "the",
+        "/s/": "suh", "/z/": "zuh", "/ʃ/": "shuh", "/ʒ/": "zhuh", "/m/": "muh",
+        "/n/": "nuh", "/ŋ/": "ung", "/h/": "huh", "/l/": "luh", "/r/": "ruh",
+        "/j/": "yuh", "/w/": "wuh", "/tʃ/": "chuh", "/dʒ/": "juh"
       };
       speak(ipaMap[word] || word.replace(/\//g, ""));
     } else {
@@ -1542,6 +1542,12 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
 
               <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl border-2 border-purple-100 text-purple-600 font-bold">
                 Ví dụ: {getSymbolData(selectedIpaSymbol)?.word}
+                <button 
+                  onClick={() => speakWord(getSymbolData(selectedIpaSymbol)?.word || "")}
+                  className="p-1.5 ml-1 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200 transition-colors"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </button>
               </div>
 
               <button 
