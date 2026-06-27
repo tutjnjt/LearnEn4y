@@ -15,9 +15,9 @@ export const playAudioFallback = (text: string) => {
   try {
     const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
     const audio = new Audio(url);
-    audio.play().catch(e => console.error("Audio fallback failed", e));
+    audio.play().catch(e => console.warn("Audio fallback failed", e));
   } catch (e) {
-    console.error("Audio creation failed", e);
+    console.warn("Audio creation failed", e);
   }
 };
 
@@ -54,7 +54,7 @@ export const speak = (text: string, rate: number = 0.9) => {
     };
 
     utterance.onerror = (e) => {
-      console.error("SpeechSynthesis error:", e);
+      console.warn("SpeechSynthesis error:", e);
       playAudioFallback(text);
     };
 
@@ -74,7 +74,7 @@ export const speak = (text: string, rate: number = 0.9) => {
     }
 
   } catch (e) {
-    console.error("Speech synthesis failed:", e);
+    console.warn("Speech synthesis failed:", e);
     playAudioFallback(text);
   }
 };

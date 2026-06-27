@@ -76,7 +76,7 @@ export function KidSkillGame({
     };
 
     recognition.onerror = (event: any) => {
-      console.error(event.error);
+      console.warn("Speech recognition error:", event.error);
       setIsRecording(false);
       if (event.error !== "aborted") {
         setFeedback("Lỗi thu âm. Vui lòng thử lại.");

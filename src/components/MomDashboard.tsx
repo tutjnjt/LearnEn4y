@@ -1055,7 +1055,7 @@ function TapToTranslateText({ text }: { text: string }) {
 
       setTimeout(() => setTranslation(null), 3000);
     } catch (e) {
-      console.error(e);
+      console.warn("Translation error:", e);
     } finally {
       setLoading(false);
     }
@@ -1325,7 +1325,7 @@ function MomGame({ level }: { level: string }) {
       const data = await res.json();
       setPairs(data.pairs || []);
     } catch (e) {
-      console.error(e);
+      console.warn("Load game failed:", e);
     } finally {
       setLoading(false);
     }
