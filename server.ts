@@ -651,6 +651,43 @@ async function startServer() {
     }
   });
 
+  // Kids Pronunciation Evaluation Endpoint
+  app.post("/api/kids/evaluate_pronunciation", async (req, res) => {
+    try {
+      if (!ai) {
+        return res
+          .status(500)
+          .json({ error: "Gemini API key is not configured" });
+      }
+      const { targetText, spokenText } = req.body;
+      let prompt = `Đóng vai một giáo viên tiếng Anh vui vẻ, nhiệt tình dạy phát âm cho trẻ em.
+Bé được yêu cầu đọc (có thể là một từ hoặc một ký hiệu IPA): "${targetText}".
+Trích xuất từ giọng nói của bé là: "${spokenText}".
+Vui lòng kiểm tra xem bé đã đọc đúng chưa. Hãy nhớ đây là kết quả nhận dạng tự động nên có thể sai sót nhỏ và bé là trẻ em nên cần động viên. 
+LƯU Ý QUAN TRỌNG: Nếu yêu cầu đọc là một ký hiệu IPA (như /i:/, /eɪ/, /tʃ/), hệ thống nhận dạng giọng nói có thể sẽ nhận diện thành các chữ cái tương ứng (ví dụ "i", "a", "ay") hoặc một từ chứa âm đó. Hãy linh hoạt đánh giá độ chính xác dựa trên âm thanh thực tế của ký hiệu IPA đó.
+Đưa ra độ khớp (phần trăm) và lời khuyên.
+Trả về JSON format chính xác:
+{
+  "isCorrect": true, // true nếu bé đọc đúng hoặc gần đúng (trên 70%)
+  "matchPercentage": 85, // phần trăm độ khớp (0-100)
+  "feedback": "Con đọc rất tốt, âm này rất tròn! / Con gần đúng rồi, chú ý âm nhé!",
+  "wrongWords": ["những từ bé đọc sai hoặc thiếu nếu có"]
+}`;
+
+      const data = await generateWithRetry(
+        ai,
+        prompt,
+        "evaluate_pronunciation"
+      );
+      res.json(data);
+    } catch (error: any) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to evaluate pronunciation" });
+    }
+  });
+
   // Kids Generation Endpoint
   app.post("/api/kids/generate", async (req, res) => {
     try {

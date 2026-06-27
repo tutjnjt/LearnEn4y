@@ -382,29 +382,51 @@ export function generateKidsData(
     return { flashcards: selectedWords };
   }
 
+  if (type === "ipa_symbol_reading") {
+    let symbols = ["/i:/", "/ɪ/", "/u:/", "/ʊ/"];
+    if (level === "ipa_week_1_2") {
+      symbols = ["/i:/", "/ɪ/", "/e/", "/æ/", "/ʌ/", "/ɑ:/", "/ʊ/", "/u:/"];
+    } else if (level === "ipa_week_3_4") {
+      symbols = ["/eɪ/", "/aɪ/", "/ɔɪ/", "/aʊ/", "/əʊ/", "/ɪə/", "/eə/"];
+    } else if (level === "ipa_week_5_6") {
+      symbols = ["/p/", "/b/", "/t/", "/d/", "/k/", "/g/", "/f/", "/v/", "/θ/", "/ð/", "/s/", "/z/", "/ʃ/", "/tʃ/"];
+    } else if (level === "ipa_week_7_8") {
+       symbols = ["/m/", "/n/", "/ŋ/", "/l/", "/r/", "/w/", "/j/"];
+    }
+    
+    // Pick 5 random symbols
+    symbols = symbols.sort(() => 0.5 - Math.random()).slice(0, 5);
+
+    return {
+      title: "Đọc Ký Hiệu IPA",
+      bulletPoints: symbols,
+      tip: "Bé nghe cẩn thận và phát âm thật to, rõ ràng âm này nhé!",
+    };
+  }
+
   if (type === "ipa_visual") {
-    const mouthShapes: Record<string, { desc: string; emoji: string }> = {
-      i: { desc: "Môi hơi bè ra hai bên như đang mỉm cười.", emoji: "😁" },
-      e: { desc: "Mở miệng vừa phải, lưỡi đặt thấp.", emoji: "😮" },
-      o: { desc: "Môi hơi tròn, mở rộng.", emoji: "😦" },
-      a: { desc: "Miệng mở to, lưỡi hạ thấp.", emoji: "😮‍💨" },
-      u: { desc: "Môi chu tròn ra phía trước.", emoji: "😗" },
-      s: { desc: "Hai hàm răng gần khép lại, thổi hơi ra.", emoji: "😬" },
-      sh: { desc: "Môi chu ra, thổi hơi mạnh (như đang suỵt).", emoji: "🤫" },
-      ch: { desc: "Môi hơi chu ra, bật hơi mạnh.", emoji: "🤫" },
-      t: { desc: "Đầu lưỡi chạm ngạc cứng trên, bật hơi.", emoji: "👅" },
-      d: { desc: "Đầu lưỡi chạm ngạc cứng trên, rung dây thanh.", emoji: "👅" },
-      b: { desc: "Hai môi mím lại rồi bật ra, rung dây thanh.", emoji: "👄" },
-      p: { desc: "Hai môi mím lại rồi bật hơi ra ngoài.", emoji: "👄" },
-      f: { desc: "Răng trên chạm môi dưới, thổi hơi.", emoji: "😬" },
-      v: { desc: "Răng trên chạm môi dưới, rung dây thanh.", emoji: "😬" },
-      m: { desc: "Hai môi mím lại, âm thoát ra đường mũi.", emoji: "👄" },
-      n: { desc: "Đầu lưỡi chạm ngạc cứng trên, âm thoát mũi.", emoji: "👅" },
-      w: { desc: "Môi tròn, hơi chu ra trước.", emoji: "😗" },
-      h: { desc: "Mở miệng tự nhiên, đẩy hơi nhẹ ra.", emoji: "😮" },
-      g: { desc: "Cuống lưỡi chạm ngạc mềm, rung thanh quản.", emoji: "😮" },
-      c: { desc: "Cuống lưỡi chạm ngạc mềm, bật hơi.", emoji: "😮" },
-      k: { desc: "Cuống lưỡi chạm ngạc mềm, bật hơi.", emoji: "😮" },
+    const mouthShapes: Record<string, { desc: string; emoji: string; type: string }> = {
+      i: { desc: "Môi hơi bè ra hai bên như đang mỉm cười.", emoji: "😁", type: "spread" },
+      e: { desc: "Mở miệng vừa phải, lưỡi đặt thấp.", emoji: "😮", type: "spread" },
+      o: { desc: "Môi hơi tròn, mở rộng.", emoji: "😦", type: "round" },
+      a: { desc: "Miệng mở to, lưỡi hạ thấp.", emoji: "😮‍💨", type: "wide" },
+      u: { desc: "Môi chu tròn ra phía trước.", emoji: "😗", type: "round" },
+      s: { desc: "Hai hàm răng gần khép lại, thổi hơi ra.", emoji: "😬", type: "consonant_teeth" },
+      sh: { desc: "Môi chu ra, thổi hơi mạnh (như đang suỵt).", emoji: "🤫", type: "round" },
+      ch: { desc: "Môi hơi chu ra, bật hơi mạnh.", emoji: "🤫", type: "round" },
+      t: { desc: "Đầu lưỡi chạm ngạc cứng trên, bật hơi.", emoji: "👅", type: "neutral" },
+      d: { desc: "Đầu lưỡi chạm ngạc cứng trên, rung dây thanh.", emoji: "👅", type: "neutral" },
+      b: { desc: "Hai môi mím lại rồi bật ra, rung dây thanh.", emoji: "👄", type: "neutral" },
+      p: { desc: "Hai môi mím lại rồi bật hơi ra ngoài.", emoji: "👄", type: "neutral" },
+      f: { desc: "Răng trên chạm môi dưới, thổi hơi.", emoji: "😬", type: "consonant_teeth" },
+      v: { desc: "Răng trên chạm môi dưới, rung dây thanh.", emoji: "😬", type: "consonant_teeth" },
+      m: { desc: "Hai môi mím lại, âm thoát ra đường mũi.", emoji: "👄", type: "neutral" },
+      n: { desc: "Đầu lưỡi chạm ngạc cứng trên, âm thoát mũi.", emoji: "👅", type: "neutral" },
+      w: { desc: "Môi tròn, hơi chu ra trước.", emoji: "😗", type: "round" },
+      h: { desc: "Mở miệng tự nhiên, đẩy hơi nhẹ ra.", emoji: "😮", type: "neutral" },
+      g: { desc: "Cuống lưỡi chạm ngạc mềm, rung thanh quản.", emoji: "😮", type: "neutral" },
+      c: { desc: "Cuống lưỡi chạm ngạc mềm, bật hơi.", emoji: "😮", type: "neutral" },
+      k: { desc: "Cuống lưỡi chạm ngạc mềm, bật hơi.", emoji: "😮", type: "neutral" },
     };
 
     const bullets = [];
@@ -417,7 +439,7 @@ export function generateKidsData(
       else if (lowerWord.startsWith("ch")) firstSound = "ch";
 
       bullets.push(word);
-      shapes.push(mouthShapes[firstSound] || { desc: "Mở miệng tự nhiên và phát âm to rõ.", emoji: "👄" });
+      shapes.push(mouthShapes[firstSound] || { desc: "Mở miệng tự nhiên và phát âm to rõ.", emoji: "👄", type: "neutral" });
     }
     return {
       title: "Khẩu Hình & Âm Thanh",

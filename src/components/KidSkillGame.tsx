@@ -9,6 +9,7 @@ import {
   Star,
 } from "lucide-react";
 import { speak } from "../utils/audio";
+import { MouthAnatomySVG } from "./MouthAnatomySVG";
 
 export function KidSkillGame({
   data,
@@ -94,7 +95,7 @@ export function KidSkillGame({
     recognition.start();
   };
 
-  const checkPronunciation = (spoken: string, target: string) => {
+  const fallbackCheck = (spoken: string, target: string) => {
     const normalizeWords = (s: string) =>
       s
         .toLowerCase()
@@ -132,8 +133,93 @@ export function KidSkillGame({
     }
   };
 
+  const checkPronunciation = async (spoken: string, target: string) => {
+    if (type.startsWith("ipa_")) {
+      setFeedback("Đang dùng AI kiểm tra phát âm... 🤖");
+      try {
+        const res = await fetch("/api/kids/evaluate_pronunciation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ targetText: target, spokenText: spoken }),
+        });
+        if (res.ok) {
+          const result = await res.json();
+          setFeedback(`${result.feedback} (Độ khớp: ${result.matchPercentage}%)`);
+          setIsCorrect(result.isCorrect);
+          if (result.wrongWords && Array.isArray(result.wrongWords)) {
+            setMissedWords(result.wrongWords.map((w: string) => w.toLowerCase()));
+          } else {
+            setMissedWords([]);
+          }
+          if (!result.isCorrect) setMisses((m) => m + 1);
+        } else {
+          fallbackCheck(spoken, target);
+        }
+      } catch (e) {
+        fallbackCheck(spoken, target);
+      }
+    } else {
+      fallbackCheck(spoken, target);
+    }
+  };
+
   const speakText = (text: string) => {
-    speak(text);
+    // If text is an IPA symbol, we map it to a word to pronounce it correctly via TTS
+    let speakWord = text;
+    if (text.startsWith("/") && text.endsWith("/")) {
+      const ipaMap: Record<string, string> = {
+        "/i:/": "ee",
+        "/ɪ/": "ih",
+        "/e/": "eh",
+        "/æ/": "ah",
+        "/ʌ/": "uh",
+        "/ɑ:/": "ah",
+        "/ɒ/": "o",
+        "/ɔ:/": "aw",
+        "/ʊ/": "uh",
+        "/u:/": "oo",
+        "/ɜ:/": "er",
+        "/ə/": "uh",
+        "/eɪ/": "ay",
+        "/aɪ/": "eye",
+        "/ɔɪ/": "oy",
+        "/aʊ/": "ow",
+        "/əʊ/": "oh",
+        "/ɪə/": "ear",
+        "/eə/": "air",
+        "/ʊə/": "oor",
+        "/p/": "puh",
+        "/b/": "buh",
+        "/t/": "tuh",
+        "/d/": "duh",
+        "/k/": "kuh",
+        "/g/": "guh",
+        "/f/": "fuh",
+        "/v/": "vuh",
+        "/θ/": "th",
+        "/ð/": "the",
+        "/s/": "suh",
+        "/z/": "zuh",
+        "/ʃ/": "sh",
+        "/ʒ/": "zh",
+        "/h/": "huh",
+        "/m/": "muh",
+        "/n/": "nuh",
+        "/ŋ/": "ng",
+        "/l/": "luh",
+        "/r/": "ruh",
+        "/j/": "yuh",
+        "/w/": "wuh",
+        "/tʃ/": "ch",
+        "/dʒ/": "juh"
+      };
+      if (ipaMap[text]) {
+        speakWord = ipaMap[text];
+      } else {
+        speakWord = text.replace(/\//g, ""); // strip slashes as fallback
+      }
+    }
+    speak(speakWord);
   };
 
   const handleWin = () => {
@@ -210,7 +296,7 @@ export function KidSkillGame({
     
     let totalSteps = 1;
     if (type === "kids_listening" || type === "kids_reading" || type === "ipa_quiz_1") totalSteps = data.questions?.length || 1;
-    else if (type === "kids_speaking" || type === "kids_phonics" || type === "ipa_visual" || type === "ipa_speaking") totalSteps = data.bulletPoints?.length || 1;
+    else if (type === "kids_speaking" || type === "kids_phonics" || type === "ipa_visual" || type === "ipa_speaking" || type === "ipa_symbol_reading") totalSteps = data.bulletPoints?.length || 1;
     else if (type === "kids_writing" || type === "ipa_quiz_2") totalSteps = data.items?.length || 1;
 
     if (step < totalSteps - 1) {
@@ -280,9 +366,9 @@ export function KidSkillGame({
     );
   }
 
-  if (type === "kids_speaking" || type === "kids_phonics" || type === "ipa_visual" || type === "ipa_speaking") {
+  if (type === "kids_speaking" || type === "kids_phonics" || type === "ipa_visual" || type === "ipa_speaking" || type === "ipa_symbol_reading") {
     const targetText = data.bulletPoints?.[step] || "";
-    const isPhonics = type === "kids_phonics" || type === "ipa_visual";
+    const isPhonics = type === "kids_phonics" || type === "ipa_visual" || type === "ipa_symbol_reading";
     const themeColor = isPhonics ? "pink" : "emerald";
     return (
       <div
@@ -296,8 +382,8 @@ export function KidSkillGame({
         
         {type === "ipa_visual" && data.shapes?.[step] && (
           <div className="flex flex-col items-center justify-center mb-6">
-            <div className="w-32 h-32 bg-pink-100 rounded-full flex items-center justify-center border-4 border-pink-200 text-6xl shadow-sm animate-bounce mb-4">
-              {data.shapes[step].emoji}
+            <div className="w-48 h-48 bg-pink-50 rounded-3xl flex items-center justify-center border-4 border-pink-200 shadow-sm animate-in zoom-in mb-4 overflow-hidden">
+              <MouthAnatomySVG type={data.shapes[step].type} />
             </div>
             <p className="text-lg font-bold text-pink-600 bg-pink-50 py-2 px-4 rounded-xl border border-pink-100">
               {data.shapes[step].desc}
@@ -308,7 +394,7 @@ export function KidSkillGame({
         <div
           className={`${isPhonics ? "bg-pink-50 border-pink-100" : "bg-emerald-50 border-emerald-100"} border-2 p-6 rounded-2xl mb-6`}
         >
-          <p className="text-2xl font-bold text-slate-800 leading-relaxed">
+          <p className={`${type === "ipa_symbol_reading" ? "text-6xl text-pink-600" : "text-2xl text-slate-800"} font-bold leading-relaxed tracking-wider`}>
             {targetText.split(/\s+/).map((word: string, index: number) => {
               const cleanWord = word.toLowerCase().replace(/[.,!?]/g, "");
               const isMissed = isCorrect === false && missedWords.includes(cleanWord);
@@ -367,7 +453,7 @@ export function KidSkillGame({
         </p>
         <button
           onClick={moveToNextStep}
-          disabled={isCorrect !== true}
+          disabled={!type.startsWith("ipa_") && isCorrect !== true}
           className={`w-full py-4 ${isPhonics ? "bg-pink-500 hover:bg-pink-600" : "bg-emerald-500 hover:bg-emerald-600"} text-white font-black text-xl rounded-2xl shadow-sm transition-colors flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {step < (data.bulletPoints?.length || 0) - 1

@@ -1125,7 +1125,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   ipaLevels.forEach(l => {
     const starsObj = gameStars[l.id] || {};
     let totalEarned = 0;
-    const ipaGames = ["ipa_visual", "ipa_speaking", "ipa_quiz_1", "ipa_quiz_2"];
+    const ipaGames = ["ipa_symbol_reading", "ipa_visual", "ipa_quiz_1", "ipa_quiz_2", "matrix", "balloon_match"];
     for (const key of ipaGames) {
       totalEarned += starsObj[key] || 0;
     }
@@ -1677,6 +1677,19 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <button
+                onClick={() => fetchGame("ipa_symbol_reading", "ipa_symbol_reading")}
+                disabled={loading !== null}
+                className="relative flex flex-col items-center justify-center p-6 bg-orange-50 border-4 border-orange-200 rounded-3xl shadow-sm hover:border-orange-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
+              >
+                {renderStars("ipa_symbol_reading")}
+                <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-orange-100 text-orange-500">
+                  <Mic className="w-8 h-8" />
+                </div>
+                <h3 className="font-black text-orange-800 text-center">Đọc Ký Hiệu IPA</h3>
+                {loading === "ipa_symbol_reading" && <Loader2 className="w-5 h-5 text-orange-500 mt-2 animate-spin" />}
+              </button>
+
+              <button
                 onClick={() => fetchGame("ipa_visual", "ipa_visual")}
                 disabled={loading !== null}
                 className="relative flex flex-col items-center justify-center p-6 bg-pink-50 border-4 border-pink-200 rounded-3xl shadow-sm hover:border-pink-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
@@ -1687,19 +1700,6 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
                 </div>
                 <h3 className="font-black text-pink-800 text-center">Khẩu Hình & Âm Thanh</h3>
                 {loading === "ipa_visual" && <Loader2 className="w-5 h-5 text-pink-500 mt-2 animate-spin" />}
-              </button>
-
-              <button
-                onClick={() => fetchGame("ipa_speaking", "ipa_speaking")}
-                disabled={loading !== null}
-                className="relative flex flex-col items-center justify-center p-6 bg-emerald-50 border-4 border-emerald-200 rounded-3xl shadow-sm hover:border-emerald-400 hover:-translate-y-1 transition-all group disabled:opacity-50"
-              >
-                {renderStars("ipa_speaking")}
-                <div className="p-4 bg-white rounded-2xl mb-3 group-hover:scale-110 transition-transform border-2 border-emerald-100 text-emerald-500">
-                  <Mic className="w-8 h-8" />
-                </div>
-                <h3 className="font-black text-emerald-800 text-center">Thực Hành Phát Âm</h3>
-                {loading === "ipa_speaking" && <Loader2 className="w-5 h-5 text-emerald-500 mt-2 animate-spin" />}
               </button>
 
               <button
@@ -2205,6 +2205,7 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
           "kids_phonics",
           "kids_reading",
           "kids_writing",
+          "ipa_symbol_reading",
           "ipa_visual",
           "ipa_speaking",
           "ipa_quiz_1",
