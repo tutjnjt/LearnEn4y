@@ -121,7 +121,22 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   ];
 
   const speakWord = (word: string) => {
-    speak(word);
+    if (word.startsWith("/") && word.endsWith("/")) {
+      const ipaMap: Record<string, string> = {
+        "/i:/": "ee", "/ɪ/": "ih", "/e/": "eh", "/æ/": "ah", "/ʌ/": "uh",
+        "/ɑ:/": "ah", "/ɒ/": "o", "/ɔ:/": "aw", "/ʊ/": "uh", "/u:/": "oo",
+        "/ɜ:/": "er", "/ə/": "uh", "/eɪ/": "ay", "/aɪ/": "eye", "/ɔɪ/": "oy",
+        "/əʊ/": "oh", "/aʊ/": "ow", "/ɪə/": "ear", "/eə/": "air", "/ʊə/": "oor",
+        "/p/": "puh", "/b/": "buh", "/t/": "tuh", "/d/": "duh", "/k/": "kuh",
+        "/g/": "guh", "/f/": "fuh", "/v/": "vuh", "/θ/": "th", "/ð/": "th",
+        "/s/": "ss", "/z/": "zz", "/ʃ/": "sh", "/ʒ/": "zh", "/m/": "mm",
+        "/n/": "nn", "/ŋ/": "ng", "/h/": "huh", "/l/": "ll", "/r/": "ruh",
+        "/j/": "yuh", "/w/": "wuh", "/tʃ/": "ch", "/dʒ/": "juh"
+      };
+      speak(ipaMap[word] || word.replace(/\//g, ""));
+    } else {
+      speak(word);
+    }
   };
 
   const [level, setLevel] = useState("Level 1");
@@ -1508,25 +1523,25 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
 
           {selectedIpaSymbol && (
             <div ref={selectedSymbolRef} className="bg-purple-50 border-4 border-purple-200 rounded-3xl p-6 mb-8 shadow-sm flex flex-col items-center justify-center relative animate-in slide-in-from-top-4 text-center max-w-2xl mx-auto">
-              <h3 className="text-4xl font-black text-purple-700 mb-2">/{selectedIpaSymbol}/</h3>
-              <p className="text-purple-900 font-bold text-xl mb-6">
+              <div className="flex items-center gap-4 mb-2">
+                <h3 className="text-5xl font-black text-purple-700">/{selectedIpaSymbol}/</h3>
+                <button 
+                  onClick={() => speakWord(`/${selectedIpaSymbol}/`)}
+                  className="p-3 bg-purple-600 text-white rounded-full hover:bg-purple-700 hover:scale-110 transition-all shadow-md flex items-center justify-center"
+                >
+                  <Volume2 className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="text-purple-900 font-bold text-xl mb-4">
                 {getSymbolData(selectedIpaSymbol)?.desc}
               </p>
               
-              <div className="w-40 h-40 bg-white rounded-3xl border-4 border-purple-100 shadow-sm flex items-center justify-center text-8xl mb-6">
+              <div className="w-32 h-32 bg-white rounded-3xl border-4 border-purple-100 shadow-sm flex items-center justify-center text-7xl mb-4">
                 {getSymbolData(selectedIpaSymbol)?.emoji}
               </div>
 
-              <div className="flex flex-col items-center gap-4">
-                <button 
-                  onClick={() => speakWord(getSymbolData(selectedIpaSymbol)?.word || "")}
-                  className="p-4 bg-purple-600 text-white rounded-full hover:bg-purple-700 hover:scale-110 transition-all shadow-md flex items-center justify-center"
-                >
-                  <Volume2 className="w-8 h-8" />
-                </button>
-                <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl border-2 border-purple-100 text-purple-600 font-bold">
-                  Ví dụ: {getSymbolData(selectedIpaSymbol)?.word}
-                </div>
+              <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl border-2 border-purple-100 text-purple-600 font-bold">
+                Ví dụ: {getSymbolData(selectedIpaSymbol)?.word}
               </div>
 
               <button 
