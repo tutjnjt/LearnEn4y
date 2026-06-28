@@ -145,7 +145,6 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   const [level, setLevel] = useState("Level 1");
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedVolume, setSelectedVolume] = useState<number | null>(null);
-  const [showReportForLevel, setShowReportForLevel] = useState<string | null>(null);
   const [customBooks, setCustomBooks] = useState<
     { id: string; name: string; color: string }[]
   >([]);
@@ -257,11 +256,11 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   } | null>(null);
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
-  const stateRef = useRef({ view, gameMode, winOverlay, showReportForLevel, ipaLevel });
+  const stateRef = useRef({ view, gameMode, winOverlay, ipaLevel });
   
   useEffect(() => {
-    stateRef.current = { view, gameMode, winOverlay, showReportForLevel, ipaLevel };
-  }, [view, gameMode, winOverlay, showReportForLevel, ipaLevel]);
+    stateRef.current = { view, gameMode, winOverlay, ipaLevel };
+  }, [view, gameMode, winOverlay, ipaLevel]);
 
   useEffect(() => {
     // Push an initial state when entering KidDashboard
@@ -271,9 +270,6 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
       const s = stateRef.current;
       if (s.winOverlay) {
         setWinOverlay(null);
-        window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
-      } else if (s.showReportForLevel) {
-        setShowReportForLevel(null);
         window.history.pushState({ isAppletLayer: true, depth: 1 }, "");
       } else if (s.gameMode) {
         setGameMode(null);
@@ -2234,14 +2230,6 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
                 <ChevronDown className="w-6 h-6 -rotate-90" />
               </button>
             )}
-            {completedLevels[level] && (
-              <button
-                onClick={() => setShowReportForLevel(level)}
-                className="flex items-center gap-2 px-6 py-4 bg-blue-500 text-white rounded-full font-black text-xl hover:bg-blue-600 hover:scale-105 transition-all shadow-lg border-4 border-blue-300"
-              >
-                <FileText className="w-6 h-6" /> Xem Báo Cáo Chặng Này
-              </button>
-            )}
             {/* TEMPORARY TEST BUTTON */}
             <button
               onClick={handleNextLevel}
@@ -2406,16 +2394,6 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
             </button>
           </div>
         </div>
-      )}
-      {showReportForLevel && selectedBook && selectedVolume && (
-        <KidReportModal
-          book={allBooks.find((b) => b.id === selectedBook)?.name || selectedBook}
-          volume={selectedVolume}
-          topic={levels.find((l) => l.id === showReportForLevel)?.name || ""}
-          level={levels.find((l) => l.id === showReportForLevel) || { id: "Level 1", name: "Level 1", emoji: "⭐" }}
-          stars={computedLevelStars[showReportForLevel] || 5}
-          onClose={() => setShowReportForLevel(null)}
-        />
       )}
     </div>
   );

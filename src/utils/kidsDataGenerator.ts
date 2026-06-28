@@ -289,7 +289,7 @@ export const KIDS_CATEGORIES: Record<
   ],
 };
 
-const ALL_WORDS = Object.values(KIDS_CATEGORIES)
+const ALL_WORDS: { word: string; meaning_vi: string; emoji: string; ipa?: string }[] = Object.values(KIDS_CATEGORIES)
   .flat()
   .map((i) => ({ word: i.word, meaning_vi: i.vi, emoji: i.emoji }));
 

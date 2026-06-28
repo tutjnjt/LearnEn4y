@@ -15,6 +15,7 @@ import { AdminDashboard } from "./components/AdminDashboard";
 
 export default function App() {
   const [started, setStarted] = useState(false);
+  const [adminMode, setAdminMode] = useState<"admin" | "play">("admin");
   const { user, profile, logout, loading } = useAuth();
 
   if (loading) {
@@ -26,16 +27,26 @@ export default function App() {
       return <LoginScreen />;
     }
     
-    if (profile?.role === "admin") {
-      return <AdminDashboard />;
+    if (profile?.role === "admin" && adminMode === "admin") {
+      return <AdminDashboard onPlay={() => setAdminMode("play")} />;
     }
     
     return (
       <div className="min-h-screen bg-sky-50 text-slate-900 font-sans p-4 relative">
         <KidDashboard onBack={() => setStarted(false)} />
-        <button onClick={logout} className="absolute top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border-2 border-slate-200 text-slate-600 rounded-full hover:bg-slate-100 transition-colors font-bold shadow-sm">
-          <LogOut className="w-5 h-5" /> Đăng Xuất ({profile?.role === "demo" ? "Demo" : user.email})
-        </button>
+        <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+          {profile?.role === "admin" && (
+            <button 
+              onClick={() => setAdminMode("admin")}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-100 border-2 border-purple-200 text-purple-700 rounded-full hover:bg-purple-200 transition-colors font-bold shadow-sm"
+            >
+              Quản Trị Viên
+            </button>
+          )}
+          <button onClick={logout} className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border-2 border-slate-200 text-slate-600 rounded-full hover:bg-slate-100 transition-colors font-bold shadow-sm">
+            <LogOut className="w-5 h-5" /> Đăng Xuất ({profile?.role === "demo" ? "Demo" : user.email})
+          </button>
+        </div>
       </div>
     );
   }
