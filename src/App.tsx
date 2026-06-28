@@ -6,17 +6,36 @@
 import React, { useState } from "react";
 import { KidDashboard } from "./components/KidDashboard";
 import { Profile } from "./types";
-import { Play, Sparkles, Star } from "lucide-react";
+import { Play, Sparkles, Star, LogOut } from "lucide-react";
 import { motion } from "motion/react";
 import { initAudio } from "./utils/audio";
+import { useAuth } from "./contexts/AuthContext";
+import { LoginScreen } from "./components/LoginScreen";
+import { AdminDashboard } from "./components/AdminDashboard";
 
 export default function App() {
-  const [profile, setProfile] = useState<Profile>(null);
+  const [started, setStarted] = useState(false);
+  const { user, profile, logout, loading } = useAuth();
 
-  if (profile === "kid") {
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-sky-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div></div>;
+  }
+
+  if (started) {
+    if (!user) {
+      return <LoginScreen />;
+    }
+    
+    if (profile?.role === "admin") {
+      return <AdminDashboard />;
+    }
+    
     return (
-      <div className="min-h-screen bg-sky-50 text-slate-900 font-sans p-4">
-        <KidDashboard onBack={() => setProfile(null)} />
+      <div className="min-h-screen bg-sky-50 text-slate-900 font-sans p-4 relative">
+        <KidDashboard onBack={() => setStarted(false)} />
+        <button onClick={logout} className="absolute top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border-2 border-slate-200 text-slate-600 rounded-full hover:bg-slate-100 transition-colors font-bold shadow-sm">
+          <LogOut className="w-5 h-5" /> Đăng Xuất ({profile?.role === "demo" ? "Demo" : user.email})
+        </button>
       </div>
     );
   }
@@ -63,7 +82,7 @@ export default function App() {
           whileTap={{ scale: 0.95 }}
           onClick={() => {
             initAudio();
-            setProfile("kid");
+            setStarted(true);
           }}
           className="w-full flex items-center justify-center gap-4 p-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full shadow-lg shadow-emerald-500/30 text-white group"
         >
