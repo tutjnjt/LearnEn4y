@@ -31,8 +31,11 @@ import SoundMemory from "./games/SoundMemory";
 import MagicColoring from "./games/MagicColoring";
 import { generateKidsData, IPA_DATA } from "../utils/kidsDataGenerator";
 import { speak } from "../utils/audio";
+import { useAuth } from "../contexts/AuthContext";
 
 export function KidDashboard({ onBack }: { onBack: () => void }) {
+  const { profile, updateProfileData } = useAuth();
+  
   const [loading, setLoading] = useState<string | null>(null);
   const [view, setView] = useState<"home" | "ipa_chart" | "ipa_map" | "ipa_menu" | "books" | "volumes" | "map" | "menu">("home");
   const [ipaLevel, setIpaLevel] = useState("ipa_stage_1");
@@ -192,29 +195,47 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
     }
   };
 
-  const [completedLevels, setCompletedLevels] = useState<Record<string, boolean>>(() => {
-    try { return JSON.parse(localStorage.getItem('kid_completedLevels') || '{}'); } catch { return {}; }
-  });
-  const [gameStars, setGameStars] = useState<Record<string, Record<string, number>>>(() => {
-    try { return JSON.parse(localStorage.getItem('kid_gameStars') || '{}'); } catch { return {}; }
-  });
-  const [avatar, setAvatar] = useState(() => localStorage.getItem('kid_avatar') || '🦊');
+  // Profile synced state
+  const completedLevels = profile?.completedLevels || {};
+  const gameStars = profile?.gameStars || {};
+  const avatar = profile?.avatar || '🦊';
+  const stars = profile?.stars || 0;
+  const points = profile?.points || 0;
+  const playTime = profile?.playTime || 0;
+
+  const setCompletedLevels = (fn: (prev: Record<string, boolean>) => Record<string, boolean>) => {
+    updateProfileData(prevProfile => ({
+      completedLevels: typeof fn === 'function' ? fn(prevProfile.completedLevels || {}) : fn
+    }));
+  };
+  const setGameStars = (fn: (prev: Record<string, Record<string, number>>) => Record<string, Record<string, number>>) => {
+    updateProfileData(prevProfile => ({
+      gameStars: typeof fn === 'function' ? fn(prevProfile.gameStars || {}) : fn
+    }));
+  };
+  const setAvatar = (newAvatar: string) => updateProfileData({ avatar: newAvatar });
+  const setStars = (fn: (prev: number) => number) => {
+    updateProfileData(prevProfile => ({
+      stars: typeof fn === 'function' ? fn(prevProfile.stars || 0) : fn
+    }));
+  };
+  const setPoints = (fn: (prev: number) => number) => {
+    updateProfileData(prevProfile => ({
+      points: typeof fn === 'function' ? fn(prevProfile.points || 0) : fn
+    }));
+  };
+  const setPlayTime = (fn: (prev: number) => number) => {
+    updateProfileData(prevProfile => ({
+      playTime: typeof fn === 'function' ? fn(prevProfile.playTime || 0) : fn
+    }));
+  };
+
   const [showAvatarSelect, setShowAvatarSelect] = useState(false);
   const avatars = ["👧", "👦", "🦊", "🐶", "🐱", "🐼", "🐯", "🐰", "🐻", "🐸"];
   const [flashcards, setFlashcards] = useState<KidFlashcard[]>([]);
   const [skillData, setSkillData] = useState<any>(null);
   const [gameMode, setGameMode] = useState<string | null>(null); // 'matrix', 'match', 'kids_listening', etc.
   const [error, setError] = useState<string | null>(null);
-  const [stars, setStars] = useState(() => parseInt(localStorage.getItem('kid_stars') || '0', 10));
-  const [points, setPoints] = useState(() => parseInt(localStorage.getItem('kid_points') || '0', 10));
-  const [playTime, setPlayTime] = useState(() => parseInt(localStorage.getItem('kid_playTime') || '0', 10));
-
-  useEffect(() => { localStorage.setItem('kid_completedLevels', JSON.stringify(completedLevels)); }, [completedLevels]);
-  useEffect(() => { localStorage.setItem('kid_gameStars', JSON.stringify(gameStars)); }, [gameStars]);
-  useEffect(() => { localStorage.setItem('kid_avatar', avatar); }, [avatar]);
-  useEffect(() => { localStorage.setItem('kid_stars', stars.toString()); }, [stars]);
-  useEffect(() => { localStorage.setItem('kid_points', points.toString()); }, [points]);
-  useEffect(() => { localStorage.setItem('kid_playTime', playTime.toString()); }, [playTime]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -324,7 +345,8 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
   };
 
   const renderStars = (gameId: string) => {
-    const s = gameStars[level]?.[gameId] || 0;
+    const targetLevelId = view === "ipa_menu" ? ipaLevel : level;
+    const s = gameStars[targetLevelId]?.[gameId] || 0;
     if (s === 0) return null;
     return (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-white px-3 py-1 rounded-full border-2 border-yellow-300 shadow-sm z-10">
@@ -1328,6 +1350,21 @@ export function KidDashboard({ onBack }: { onBack: () => void }) {
       {/* Home View */}
       {view === "home" && !gameMode && (
         <div className="bg-white rounded-3xl border-4 border-slate-100 shadow-sm p-8 mt-12 relative animate-in fade-in slide-in-from-bottom-4">
+          <div className="mb-10 p-6 bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-100 rounded-3xl border-4 border-white shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <Sparkles className="w-10 h-10 text-yellow-500 mb-3 animate-pulse" />
+              <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 drop-shadow-sm leading-tight">
+                Bố Tú tặng Bún, <br className="md:hidden" />chúc con gái học giỏi!
+              </h1>
+              <div className="mt-4 flex gap-2">
+                <span className="text-3xl">👧🏻</span>
+                <span className="text-3xl">💖</span>
+                <span className="text-3xl">👨‍👧</span>
+              </div>
+            </div>
+          </div>
+          
           <h2 className="text-3xl font-black text-center text-slate-800 mb-2">
             Hôm nay bé muốn học gì nào?
           </h2>
